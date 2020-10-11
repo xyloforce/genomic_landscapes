@@ -11,8 +11,10 @@ def get_data(baseURL, payload):
         try:
             # request add to the baseURL the params passed as dict
             request = requests.get(baseURL, params=payload)
-        except requests.ConnectionError:
-            print("Error : connection error. Retrying...")
+        except (requests.ConnectionError, requests.HTTPError,requests.Timeout) :
+            print("Error : connection failed. Retrying...")
+        except ValueError:
+            print("Error : JSON invalid. Retrying...")
         else:
             retry = False
         print("Requested " + request.url)
@@ -38,7 +40,10 @@ def orthologs(groups):
             for organism in data:  # data is a list of organism
                 for genes in organism["genes"]:  # organism is a dic
                     # genes is a dic of dic of dic (urk)
-                    orthologs[gene] = list(set(orthologs[gene]).add(genes["gene_id"]["param"]))
+                    if gene not in orthologs:  # forgot to initialize
+                        orthologs[gene] = list()
+                    orthologs[gene].append(genes["gene_id"]["param"])
+                    orthologs[gene] = list(set(orthologs[gene]))
     return orthologs
 
 
@@ -51,5 +56,8 @@ def ogdetails(orthologs):
             if "xrefs" in data:  # xrefs contains crossrefs, not always present
                 for dict in data["xrefs"]:  # xrefs is a list of dic
                     if dict["type"] == "GeneID" or dict["type"] == "NCBIgene":  # option 1 to save the geneID
-                        ncbi_orthologs[gene] = list(set(ncbi_orthologs[gene]).add(dict["id"]))
+                        if gene not in ncbi_orthologs:  # forgot to initialize
+                            ncbi_orthologs[gene] = list()
+                        ncbi_orthologs[gene].append(dict["id"])
+                        ncbi_orthologs[gene] = list(set(ncbi_orthologs[gene]))
     return ncbi_orthologs
