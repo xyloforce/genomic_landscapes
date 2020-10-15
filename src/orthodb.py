@@ -8,6 +8,7 @@
 import requests
 import json
 import time
+import simplejson
 
 
 def get_data(baseURL, payload):
@@ -20,14 +21,15 @@ def get_data(baseURL, payload):
         try:
             # request add to the baseURL the params passed as dict
             request = requests.get(baseURL, params=payload)
+            data = request.json()["data"]
         except (requests.ConnectionError, requests.HTTPError, requests.Timeout):
             print("Error : connection failed. Retrying...")
-        except ValueError:
+        except (ValueError, simplejson.errors.JSONDecodeError):
             print("Error : JSON invalid. Retrying...")
         else:
             retry = False
         print("Requested " + request.url)
-        return request.json()["data"]
+        return data
 
 
 def search(genes, ncbi=1, level=32523):
