@@ -1,7 +1,6 @@
 import json
 import time
 import requests
-import xml.etree.ElementTree as xml
 import sys
 
 import src.orthodb as orthodb
@@ -80,7 +79,7 @@ else:
 if isNeeded(orthologs_groups, 'gene_ids.json'):
     # ====== get the orthologs IDs ====== #
     print("Searching contents of orthologs groups")
-    gene_ids = orthodb.orthologs(orthologs_groups)
+    gene_ids = orthodb.orthologs(orthologs_groups)  # gene_ids is dict
     with open('gene_ids.json', 'w') as json_file:
         json.dump(gene_ids, json_file)
 else:
@@ -101,20 +100,12 @@ print("Requesting the NCBI")
 # ====== get dict of gene_id:list(ncbi_taxid) ====== #
 species = dict()
 for human_gene in ncbi_gene_ids:
-    for ortholog in ncbi_gene_ids[human_gene]:
+    for geneID_ortholog in ncbi_gene_ids[human_gene]:
         url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
-        request = get_request(url, {'db': "gene", "id": ortholog})
-        try:
-            xml_file = xml.parse(request.text)  # oh no its xml :(
-        except:
-            print("XML file invalid : " + ortholog)  # just in case
-        else:
-            # get the freaking taxid
-            if not xml_file.findall("//TaxID")[0].text == "":
-                if human_gene not in species:  # forgot to initialize
-                    species[human_gene] = list()
-                species[human_gene].append(xml_file.findall("//TaxID")[0].text)
-                species[human_gene] = list(set(species[human_gene]))
-
+        request = get_request(url, {'db': "gene", "id": geneID_ortholog, "format": "json"})
+        if human_gene not in species:  # forgot to initialize
+            species[human_gene] = list()
+        species[human_gene].append(request.json()["result"]["organism"]["taxid"])
+        species[human_gene] = list(set(species[human_gene]))
 with open('species.json', 'w') as json_file:
     json.dump(species, json_file)
