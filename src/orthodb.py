@@ -71,10 +71,10 @@ def ogdetails(orthologs):
         for ortholog in orthologs["gene"]:
             data = get_data("https://www.orthodb.org/ogdetails", {"id": ortholog})
             if "xrefs" in data:  # xrefs contains crossrefs, not always present
-                for dict in data["xrefs"]:  # xrefs is a list of dic
-                    if dict["type"] == "GeneID" or dict["type"] == "NCBIgene":  # option 1 to save the geneID
+                for xref_dict in data["xrefs"]:  # xrefs is a list of dic
+                    if xref_dict["type"] == "GeneID" or xref_dict["type"] == "NCBIgene":  # options to save the geneID
                         if gene not in ncbi_orthologs:  # forgot to initialize
                             ncbi_orthologs[gene] = list()
-                        ncbi_orthologs[gene].append(dict["id"])
+                        ncbi_orthologs[gene].append(xref_dict["id"])
                         ncbi_orthologs[gene] = list(set(ncbi_orthologs[gene]))
     return ncbi_orthologs
