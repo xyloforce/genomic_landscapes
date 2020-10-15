@@ -68,7 +68,7 @@ def ogdetails(orthologs):
     """
     ncbi_orthologs = dict()
     for gene in orthologs:
-        for ortholog in orthologs["gene"]:
+        for ortholog in orthologs[gene]:
             data = get_data("https://www.orthodb.org/ogdetails", {"id": ortholog})
             if "xrefs" in data:  # xrefs contains crossrefs, not always present
                 for xref_dict in data["xrefs"]:  # xrefs is a list of dic
