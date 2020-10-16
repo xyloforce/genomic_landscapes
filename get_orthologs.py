@@ -103,7 +103,7 @@ for human_gene in ncbi_gene_ids:
         request = get_request(url, {'db': "gene", "id": geneID_ortholog, "format": "json"})
         if human_gene not in species:  # forgot to initialize
             species[human_gene] = list()
-        species[human_gene].append(request.json()["result"]["organism"]["taxid"])
+        species[human_gene].append(request.json()["result"][geneID_ortholog]["organism"]["taxid"])
         species[human_gene] = list(set(species[human_gene]))
 with open('species.json', 'w') as json_file:
     json.dump(species, json_file)
