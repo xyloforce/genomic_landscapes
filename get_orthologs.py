@@ -71,7 +71,7 @@ if isNeeded2(genomeGenesList, 'orthologs_groups.json'):
     with open('orthologs_groups.json', 'w') as json_file:
         json.dump(orthologs_groups, json_file)
 else:
-    with open(secondFileSavedJSON) as json_file:
+    with open('orthologs_groups.json') as json_file:
         orthologs_groups = json.load(json_file)
 
 if isNeeded(orthologs_groups, 'gene_ids.json'):
