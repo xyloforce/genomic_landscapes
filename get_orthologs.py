@@ -1,19 +1,21 @@
 import json
 import time
 import requests
-import xml.etree.ElementTree as xml
+import sys
 
-import orthodb
+import src.orthodb as orthodb
 
 
-# ====== function to make a request ====== #
 def get_request(baseURL, payload):
+    """
+    function to make a request
+    """
     retry = True
     while retry:  # RETRY UNTIL SUCCES U SONOFAGUN
         time.sleep(1)
         try:
             request = requests.get(baseURL, params=payload)
-        except (requests.ConnectionError, requests.HTTPError,requests.Timeout) :
+        except (requests.ConnectionError, requests.HTTPError, requests.Timeout):
             print("Error : connection failed. Retrying...")
         except ValueError:
             print("Error : JSON invalid. Retrying...")
@@ -23,7 +25,10 @@ def get_request(baseURL, payload):
         return request
 
 
-def isNeeded(old_dic, saved_json):  # check if an existing file is complete
+def isNeeded(old_dic, saved_json):
+    """
+    check if an existing file is complete
+    """
     try:
         with open(saved_json) as json_file:
             new_dic = json.load(json_file)
@@ -55,23 +60,26 @@ def isNeeded2(old_list, saved_json):
 
 
 # ====== load gene set generated from the other script ====== #
-with open('gene_set.json') as json_file:
-    genes = json.load(json_file)
+with open(sys.argv[1]) as json_file:
+    genomeGenesList = json.load(json_file)
 
 # ====== get the orthologs groups ====== #
-if isNeeded2(genes, 'orthologs_groups.json'):
+secondFileSavedJSON = 'orthologs_groups.json'
+
+if isNeeded2(genomeGenesList, secondFileSavedJSON):
     print("Searching orthologs")
-    orthologs_groups = orthodb.search(genes)
-    with open('orthologs_groups.json', 'w') as json_file:
+    # Request NCBI and create a dict
+    orthologs_groups = orthodb.search(genomeGenesList)
+    with open(secondFileSavedJSON, 'w') as json_file:
         json.dump(orthologs_groups, json_file)
 else:
-    with open('orthologs_groups.json') as json_file:
+    with open(secondFileSavedJSON) as json_file:
         orthologs_groups = json.load(json_file)
 
 if isNeeded(orthologs_groups, 'gene_ids.json'):
     # ====== get the orthologs IDs ====== #
     print("Searching contents of orthologs groups")
-    gene_ids = orthodb.orthologs(orthologs_groups)
+    gene_ids = orthodb.orthologs(orthologs_groups)  # gene_ids is dict
     with open('gene_ids.json', 'w') as json_file:
         json.dump(gene_ids, json_file)
 else:
@@ -92,20 +100,12 @@ print("Requesting the NCBI")
 # ====== get dict of gene_id:list(ncbi_taxid) ====== #
 species = dict()
 for human_gene in ncbi_gene_ids:
-    for ortholog in ncbi_gene_ids[human_gene]:
+    for geneID_ortholog in ncbi_gene_ids[human_gene]:
         url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
-        request = get_request(url, {'db': "gene", "id": ortholog})
-        try:
-            xml_file = xml.parse(request.text)  # oh no its xml :(
-        except:
-            print("XML file invalid : " + ortholog)  # just in case
-        else:
-            # get the freaking taxid
-            if not xml_file.findall("//TaxID")[0].text == "":
-                if human_gene not in species:  # forgot to initialize
-                    species[human_gene] = list()
-                species[human_gene].append(xml_file.findall("//TaxID")[0].text)
-                species[human_gene] = list(set(species[human_gene]))
-
+        request = get_request(url, {'db': "gene", "id": geneID_ortholog, "format": "json"})
+        if human_gene not in species:  # forgot to initialize
+            species[human_gene] = list()
+        species[human_gene].append(request.json()["result"]["organism"]["taxid"])
+        species[human_gene] = list(set(species[human_gene]))
 with open('species.json', 'w') as json_file:
     json.dump(species, json_file)
