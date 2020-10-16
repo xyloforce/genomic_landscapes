@@ -28,8 +28,8 @@ def get_data(baseURL, payload):
             print("Error : JSON invalid. Retrying...")
         else:
             retry = False
-        print("Requested " + request.url)
-        return data
+    print("Requested " + request.url)
+    return data
 
 
 def search(genes, ncbi=1, level=32523):

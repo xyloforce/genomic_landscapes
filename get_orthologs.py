@@ -21,8 +21,8 @@ def get_request(baseURL, payload):
             print("Error : JSON invalid. Retrying...")
         else:
             retry = False
-        print("Requested " + request.url)
-        return request
+    print("Requested " + request.url)
+    return request
 
 
 def isNeeded(old_dic, saved_json):
