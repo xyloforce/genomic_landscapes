@@ -64,13 +64,11 @@ with open(sys.argv[1]) as json_file:
     genomeGenesList = json.load(json_file)
 
 # ====== get the orthologs groups ====== #
-secondFileSavedJSON = 'orthologs_groups.json'
-
-if isNeeded2(genomeGenesList, secondFileSavedJSON):
+if isNeeded2(genomeGenesList, 'orthologs_groups.json'):
     print("Searching orthologs")
     # Request NCBI and create a dict
     orthologs_groups = orthodb.search(genomeGenesList)
-    with open(secondFileSavedJSON, 'w') as json_file:
+    with open('orthologs_groups.json', 'w') as json_file:
         json.dump(orthologs_groups, json_file)
 else:
     with open(secondFileSavedJSON) as json_file:
