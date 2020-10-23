@@ -7,6 +7,7 @@
 ##########################################################
 import requests
 import json
+import csv
 import time
 import simplejson
 
@@ -44,37 +45,43 @@ def search(genes, ncbi=1, level=32523):
     return groups
 
 
-def orthologs(groups):
+def orthologs(groups, csv_source):
     """
     creates gene:(geneIDs) for each group in gene:(groups)
     """
     orthologs = dict()
+    parsed = dict()
+    csvfile = open(csv_source)
+    csv_reader = csv.DictReader(csvfile, dialect=csv.excel_tab(), fieldnames=['OG', 'geneID'])
+    for row in csv_reader:
+        if row['OG'] not in parsed:
+            parsed[row["OG"]] = list()
+        parsed[row["OG"]].append(row["geneID"])
     for gene in groups:
         for group in groups[gene]:
-            data = get_data("https://www.orthodb.org/orthologs", {"id": group})
-            for organism in data:  # data is a list of organism
-                for genes in organism["genes"]:  # organism is a dic
-                    # genes is a dic of dic of dic (urk)
-                    if gene not in orthologs:  # forgot to initialize
-                        orthologs[gene] = list()
-                    orthologs[gene].append(genes["gene_id"]["param"])
-                    orthologs[gene] = list(set(orthologs[gene]))
+            if gene not in orthologs:  # forgot to initialize
+                orthologs[gene] = list()
+            orthologs[gene] = orthologs[gene] + parsed[group]
+            orthologs[gene] = list(set(orthologs[gene]))
     return orthologs
 
 
-def ogdetails(orthologs):
+def ogdetails(gene_ids, csv_source):
     """
     creates gene:(ncbi_geneIDs) for each geneID in gene:(geneIDs)
     """
-    ncbi_orthologs = dict()
-    for gene in orthologs:
-        for ortholog in orthologs[gene]:
-            data = get_data("https://www.orthodb.org/ogdetails", {"id": ortholog})
-            if "xrefs" in data:  # xrefs contains crossrefs, not always present
-                for xref_dict in data["xrefs"]:  # xrefs is a list of dic
-                    if xref_dict["type"] == "GeneID" or xref_dict["type"] == "NCBIgene":  # options to save the geneID
-                        if gene not in ncbi_orthologs:  # forgot to initialize
-                            ncbi_orthologs[gene] = list()
-                        ncbi_orthologs[gene].append(xref_dict["id"])
-                        ncbi_orthologs[gene] = list(set(ncbi_orthologs[gene]))
-    return ncbi_orthologs
+    with open(csv_source) as csvfile:
+        convert = dict()
+        csv_reader = csv.DictReader(csvfile, dialect=csv.excel_tab(), fieldnames=['ortho_id', 'value', 'type'])
+        for row in csv_reader:
+            if(row['type'] == "NCBIgid"):
+                convert[row["ortho_id"]] = row["value"]
+        ncbi_gene_ids = dict()
+        for gene in gene_ids:
+            if gene not in ncbi_gene_ids:  # forgot to initialize
+                ncbi_gene_ids[gene] = list()
+            for ortholog in gene_ids[gene]:
+                if ortholog in convert:
+                    ncbi_gene_ids[gene].append(convert[ortholog])
+                    print("Parsed gene ID " + ortholog)
+    return ncbi_gene_ids

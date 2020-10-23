@@ -1,8 +1,9 @@
 import json
 import time
 import requests
+import subprocess
 import sys
-
+import csv
 import src.orthodb as orthodb
 
 
@@ -59,6 +60,28 @@ def isNeeded2(old_list, saved_json):
         return needed
 
 
+def getNCBIData(ncbi_gene_ids):
+    csv_file = open("species_gene_humanortho.csv", "w", newline="")
+    fieldnames = ["human_gene", "species", "taxid", "geneID"]
+    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+    writer.writeheader()
+
+    for gene in ncbi_gene_ids:
+        query = " ".join(ncbi_gene_ids[gene])
+        command = "./datasets summary gene gene-id " + query
+        process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, universal_newlines=True)
+        output, error = process.communicate()
+        try:
+            query_dict = json.loads(output)
+        except:
+            print("error intercepted")
+        for ortholog in query_dict["genes"]:
+            writer.writerow({"human_gene": gene,
+                            "species": ortholog["gene"]["taxname"],
+                            "taxid": ortholog["gene"]["tax_id"],
+                            "geneID": ortholog["gene"]["gene_id"]})
+
+
 # ====== load gene set generated from the other script ====== #
 with open(sys.argv[1]) as json_file:
     genomeGenesList = json.load(json_file)
@@ -77,33 +100,21 @@ else:
 if isNeeded(orthologs_groups, 'gene_ids.json'):
     # ====== get the orthologs IDs ====== #
     print("Searching contents of orthologs groups")
-    gene_ids = orthodb.orthologs(orthologs_groups)  # gene_ids is dict
+    gene_ids = orthodb.orthologs(orthologs_groups, "orthodb_data/odb10v1_OG2genes.tab")  # gene_ids is dict
     with open('gene_ids.json', 'w') as json_file:
         json.dump(gene_ids, json_file)
 else:
     with open('gene_ids.json') as json_file:
         gene_ids = json.load(json_file)
 
-# ====== get the orthologs NCBI IDs ====== #
 if isNeeded(gene_ids, 'ncbi_gene_ids.json'):
-    print("Searching ncbi IDs")
-    ncbi_gene_ids = orthodb.ogdetails(gene_ids)
+    # ====== get the orthologs NCBI IDs ====== #
+    print("Searching contents of orthologs groups")
+    ncbi_gene_ids = orthodb.ogdetails(gene_ids, "orthodb_data/odb10v1_gene_xrefs.tab")  # gene_ids is dict
     with open('ncbi_gene_ids.json', 'w') as json_file:
         json.dump(ncbi_gene_ids, json_file)
 else:
     with open('ncbi_gene_ids.json') as json_file:
-        ncbi_gene_ids = json.load(json_file)
+        gene_ids = json.load(json_file)
 
-print("Requesting the NCBI")
-# ====== get dict of gene_id:list(ncbi_taxid) ====== #
-species = dict()
-for human_gene in ncbi_gene_ids:
-    for geneID_ortholog in ncbi_gene_ids[human_gene]:
-        url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
-        request = get_request(url, {'db': "gene", "id": geneID_ortholog, "format": "json"})
-        if human_gene not in species:  # forgot to initialize
-            species[human_gene] = list()
-        species[human_gene].append(request.json()["result"][geneID_ortholog]["organism"]["taxid"])
-        species[human_gene] = list(set(species[human_gene]))
-with open('species.json', 'w') as json_file:
-    json.dump(species, json_file)
+getNCBIData(ncbi_gene_ids)
