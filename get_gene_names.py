@@ -13,11 +13,14 @@ else:
     sys.exit()
 
 #extract GeneID
+gene_count = 0
 for line in open(genomefile).readlines():
     if not line[0] == "#":
         columns = line.split("\t")
         if columns[2] == "gene":
             for value in re.findall("Dbxref=GeneID:(\d*)", columns[8]):
                 gene_set.add(value)
+                gene_count += 1
                 with open(geneList, 'w') as json_file:
                     json.dump(list(gene_set), json_file)
+print(f"{gene_count} genes extracted")
