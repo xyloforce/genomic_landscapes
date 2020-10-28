@@ -6,6 +6,7 @@ from Bio import SeqIO
 import gzip
 from Bio.Alphabet import generic_dna
 
+
 class info_gene(dict):
     def __init__(self, id_human, id_species, start, end, strand):
         self.id_human = id_human
@@ -82,5 +83,4 @@ sequence_genes_specie = cut_fasta_gene(dico, fasta)
 
 for i in sequence_genes_specie.values():
     test = str(calcul_GC(i[0]))
-    print("le gène "+i[1] + " qui est orthologue du gène " + i[2] + " dans le génome de référence à un taux de GC de " + test +" %" )
-
+    print("le gène "+i[1] + " qui est orthologue du gène " + i[2] + " dans le génome de référence à un taux de GC de " + test + " %")
