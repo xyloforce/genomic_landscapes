@@ -4,7 +4,9 @@ import requests
 import subprocess
 import sys
 import csv
+
 import src.orthodb as orthodb
+import src.ncbi as ncbi
 
 
 def get_request(baseURL, payload):
@@ -60,28 +62,6 @@ def isNeeded2(old_list, saved_json):
         return needed
 
 
-def getNCBIData(ncbi_gene_ids):
-    csv_file = open("species_gene_humanortho.csv", "w", newline="")
-    fieldnames = ["human_gene", "species", "taxid", "geneID"]
-    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-    writer.writeheader()
-
-    for gene in ncbi_gene_ids:
-        query = " ".join(ncbi_gene_ids[gene])
-        command = "./datasets summary gene gene-id " + query
-        process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, universal_newlines=True)
-        output, error = process.communicate()
-        try:
-            query_dict = json.loads(output)
-        except:
-            print("error intercepted")
-        for ortholog in query_dict["genes"]:
-            writer.writerow({"human_gene": gene,
-                            "species": ortholog["gene"]["taxname"],
-                            "taxid": ortholog["gene"]["tax_id"],
-                            "geneID": ortholog["gene"]["gene_id"]})
-
-
 # ====== load gene set generated from the other script ====== #
 with open(sys.argv[1]) as json_file:
     genomeGenesList = json.load(json_file)
@@ -117,4 +97,15 @@ else:
     with open('ncbi_gene_ids.json') as json_file:
         gene_ids = json.load(json_file)
 
-getNCBIData(ncbi_gene_ids)
+csv_file = open("species_gene_humanortho.csv", "w", newline="")
+fieldnames = ["human_gene", "species", "taxid", "geneID"]
+writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+writer.writeheader()
+
+for gene in ncbi_gene_ids:
+    query_dict = ncbi.summary(" gene gene-id ", " ".join(ncbi_gene_ids[gene]))
+    for ortholog in query_dict["genes"]:
+        writer.writerow({"human_gene": gene,
+                         "species": ortholog["gene"]["taxname"],
+                         "taxid": ortholog["gene"]["tax_id"],
+                         "geneID": ortholog["gene"]["gene_id"]})
