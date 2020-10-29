@@ -19,13 +19,7 @@ class info_gene(dict):
         return self.id_species + " a pour gène orthologue chez l'humain " + self.id_human
 
 
-in_file = "subset500_GCF_GRCh38.gff"
-test = [("id_humain_1", "102466751"),
-        ("id_humain_2", "107985721"),
-        ("id_humain_3", "79854")]
-
-
-def get_info_gene(liste_tuple_gene, filegff):
+def get_info_gene(liste_tuple_gene, filegff): # return dic of class info_gene with 
     dico_info_gene = dict()
     for tuple_gene in liste_tuple_gene:
         limit_info = dict(gff_type=["gene"])
@@ -65,9 +59,6 @@ def cut_fasta_gene(dico_info_gene, fasta):
     return dico_seq_fasta
 
 
-fasta = "test.fna"
-
-
 def calcul_GC(list_sequence_gene):
     taux_GC = list()
     for i in list_sequence_gene:
@@ -77,10 +68,14 @@ def calcul_GC(list_sequence_gene):
     return taux_GCGene
 
 
+in_file = "subset500_GCF_GRCh38.gff"
+test = [("id_humain_1", "102466751"),
+        ("id_humain_2", "107985721"),
+        ("id_humain_3", "79854")]
+fasta = "test.fna"
+
 dico = get_info_gene(test, in_file)
-sequence_genes_specie = cut_fasta_gene(dico, fasta)
-
-
-for i in sequence_genes_specie.values():
+sequence_genes_species = cut_fasta_gene(dico, fasta)
+for i in sequence_genes_species.values():
     test = str(calcul_GC(i[0]))
     print("le gène "+i[1] + " qui est orthologue du gène " + i[2] + " dans le génome de référence à un taux de GC de " + test + " %")
