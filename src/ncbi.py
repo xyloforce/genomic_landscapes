@@ -4,7 +4,10 @@ import json
 import zipfile
 
 
-def get_genome_from_ncbi(taxid):
+def get_genome(taxid):
+    """
+    from taxid get genome file with gff and fna, extracts them to /tmp and return filelist
+    """
     query_dict = summary("genome taxon ", taxid)
     print(query_dict)
     accession = query_dict["assemblies"][0]["assembly"]["assembly_accession"]
@@ -22,7 +25,10 @@ def get_genome_from_ncbi(taxid):
     return extracted_file
 
 
-def summary(type, gene_ids): # split : create a summary method returning the true summary already parsed
+def summary(type, gene_ids):
+    """
+    return dic of summary for given gene_ids
+    """
     command = "./datasets summary " + type + gene_ids
     process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, universal_newlines=True)
     output, error = process.communicate()
