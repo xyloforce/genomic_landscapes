@@ -5,77 +5,86 @@ from BCBio import GFF
 from Bio import SeqIO
 import gzip
 from Bio.Alphabet import generic_dna
+import re
 
 
 class info_gene(dict):
-    def __init__(self, id_human, id_species, start, end, strand):
+    """
+    Define an object who take information about one gene.
+    """
+    def __init__(self, id_human, id_species):
         self.id_human = id_human
         self.id_species = id_species
-        self.start = start
-        self.end = end
-        self.strand = strand
+        self.coord_gene = []
+        self.coord_exon= []
+        self.chr=""
 
     def __repr__(self):
         return self.id_species + " a pour gène orthologue chez l'humain " + self.id_human
 
-
-def get_info_gene(liste_tuple_gene, filegff): # return dic of class info_gene with 
-    dico_info_gene = dict()
-    for tuple_gene in liste_tuple_gene:
+    def get_info_gene(self, filegff):
+        """ 
+        take a gff file (geneID human, geneID orthologue species) and return information about these geneID
+        """
+        formule=re.compile('\[(\d+):(\d+)\]\((.)\)')
         limit_info = dict(gff_type=["gene"])
         examiner = GFFExaminer()
         in_handle = open(filegff)
         for rec in GFF.parse(in_handle, limit_info=limit_info):
             for i in rec.features:
-                texte = "GeneID:" + tuple_gene[1]
+                texte = "GeneID:" + self.id_species
                 if i.qualifiers['Dbxref'][0] == texte:
-                    localisation = str(i.location)
-                    localisation = localisation.split('](')
-                    localisation[0] = localisation[0][1:]
-                    localisation[1] = localisation[1][:-1]
-                    localisation[0] = localisation[0].split(':')
-                    info = info_gene(id_human=tuple_gene[0],
-                                     id_species=tuple_gene[1],
-                                     start=localisation[0][0],
-                                     end=localisation[0][1],
-                                     strand=localisation[1])
-                    dico_info_gene[info.id_species] = info
-                in_handle.close()
-            return dico_info_gene
+                    coordinate=formule.findall(str(i.location))
+                    self.coord_gene=coordinate
+                    self.chr=rec.id
+        in_handle.close()
+
+"""
+    def get_info_exon(self, filegff):
+        formule=re.compile('\[(\d+):(\d+)\]\((.)\)')
+        limit_info = dict(gff_type=["exon"])
+        examiner = GFFExaminer()
+        in_handle = open(filegff)
+        for rec in GFF.parse(in_handle, limit_info=limit_info):
+            for i in rec.features:
+                if i.type== "exon":
+                    texte = "GeneID:" + self.id_species
+                    if i.qualifiers['Dbxref'][0] == texte:
+                        coordinate=formule.findall(str(i.location))
+                        self.coord_exon.append(coordinate)
+        in_handle.close()
+"""
+
 
 
 def cut_fasta_gene(dico_info_gene, fasta):
-    dico_seq_fasta = dict()
+    """
+    cut in a fasta file and return sequence of interess in a dico (exon, intron, gene, flanking region etc...)
+    """
+    dico_seq_gene = dict()
     sequence_gene = list()
     records = list(SeqIO.parse(fasta, "fasta"))
-    fasta_sequence = str(records[0].seq)
     for i in dico_info_gene.values():
-        start_gene = int(i.start)
-        end_gene = int(i.end)
-        strand = i.strand
-        nom_gene = i.id_species
-        sequence_gene = fasta_sequence[start_gene:end_gene]
-        dico_seq_fasta[str(i.id_human)] = [sequence_gene, nom_gene, i.id_human]
-    return dico_seq_fasta
+        for j in i.coord_gene:
+            start_gene = int(j[0])
+            end_gene = int(j[1])
+            strand = j[2]
+        chromosome=str(i.chr)
+        for fasta in records:
+            if fasta.id == chromosome:
+                fasta_sequence = str(fasta.seq)                     
+                sequence_gene = fasta_sequence[start_gene:end_gene]
+                dico_seq_gene[str(i.id_human)] = [sequence_gene, i.id_species, i.id_human,i.chr]
+    return dico_seq_gene
 
 
 def calcul_GC(list_sequence_gene):
+    """
+    calcul GC rate from a list of sequence
+    """
     taux_GC = list()
     for i in list_sequence_gene:
         test = GC(i)
         taux_GC.append(test)
     taux_GCGene = sum(taux_GC)/len(list_sequence_gene)
     return taux_GCGene
-
-
-in_file = "subset500_GCF_GRCh38.gff"
-test = [("id_humain_1", "102466751"),
-        ("id_humain_2", "107985721"),
-        ("id_humain_3", "79854")]
-fasta = "test.fna"
-
-dico = get_info_gene(test, in_file)
-sequence_genes_species = cut_fasta_gene(dico, fasta)
-for i in sequence_genes_species.values():
-    test = str(calcul_GC(i[0]))
-    print("le gène "+i[1] + " qui est orthologue du gène " + i[2] + " dans le génome de référence à un taux de GC de " + test + " %")
