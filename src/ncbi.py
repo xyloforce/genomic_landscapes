@@ -10,13 +10,13 @@ import sys
 import subprocess
 import json
 import zipfile
-import time
+import os
 
 
 PATH_DATASET = "./datasets"
-PATH_TO_DATA_DL = "/tmp/data"
-SUBTYPE_LIST = ["accession", "taxon", "gene-id", "symbol"] #  from NCBI documentation
-VERBOSE = True # simple verbose mode, recommandation to false
+PATH_TO_DATA_DL = "/tmp/genome/"  # don’t forget / at end
+SUBTYPE_LIST = ["accession", "taxon", "gene-id", "symbol"]  # from NCBI documentation
+VERBOSE = True  # simple verbose mode, recommandation to false
 
 
 def summary(type, value, subtype=None):
@@ -81,18 +81,27 @@ def get_genome(taxid):
     output, error = process.communicate()
     if error is None:
         # if ok, we unzip the genome file
-        sys.exit()
         downloaded_file = zipfile.ZipFile("ncbi_dataset.zip")
-        extracted_file = list()
-        file_list = downloaded_file.namelist()
-        for archive_file in file_list:
-            if archive_file[-3:] == "gff" or archive_file[-3:] == "fna":
-                downloaded_file.extract(archive_file, path="/tmp")
-                extracted_file.append(archive_file)
-        return extracted_file
+        extracted_file_list = list()  # contain path to files extracted
+        for archive_file in downloaded_file.namelist():
+            # get gff and fna files
+            if archive_file.endswith((".gff", ".fna")):
+                file_to_extract = archive_file.split('/')[-1]
+                # checking path conditions
+                if not os.path.exists(PATH_TO_DATA_DL):
+                    print(f"[Info] {PATH_TO_DATA_DL} not existed, so will create")
+                if os.path.isfile(PATH_TO_DATA_DL + archive_file):
+                    print(f"[Warning] {PATH_TO_DATA_DL + archive_file} destination is a file and will rewrite")
+                try:
+                    downloaded_file.extract(archive_file, path=PATH_TO_DATA_DL)
+                    extracted_file_list.append(PATH_TO_DATA_DL + archive_file)
+                    print(f"{file_to_extract} extracted")
+                except NotADirectoryError as e:
+                    # print(f"Error with path destination ({str(e).split()[-1]})")
+                    print(f"Error with path destination ({str(e)})")
+        return extracted_file_list
     else:
         print(f"error in command line : {error}")
-    sys.exit()
 
 
 #  test if datasets is installed
