@@ -42,7 +42,7 @@ csvfile = open(sys.argv[1]) # CSV containing "taxid" "human_gene" "ortholog"
 csv_reader = csv.DictReader(csvfile)
 
 pathToFasta = sys.argv[2]
-pathToGFF = sys.argv[2]
+pathToGFF = sys.argv[3]
 
 human_gene_set = set() # set of humans genes
 species_dic = dict() # dic of object species
@@ -52,3 +52,4 @@ for row in csv_reader:
     if row["taxid"] not in species_dic: # if the species object for this taxid does not exists
         species_dic[row["taxid"]] = species(row["taxid"])
     species_dic[row["taxid"]].add_gene(row["human_gene"], row["geneID"]) # uses the add_gene function to add the current ortholog to the species object
+
