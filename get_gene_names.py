@@ -14,6 +14,8 @@ else:
 
 #extract GeneID
 gene_count = 0
+countPrint = 5000  # print at all number genes
+
 for line in open(genomefile).readlines():
     if not line[0] == "#":
         columns = line.split("\t")
@@ -23,4 +25,6 @@ for line in open(genomefile).readlines():
                 gene_count += 1
                 with open(geneList, 'w') as json_file:
                     json.dump(list(gene_set), json_file)
-print(f"{gene_count} genes extracted")
+                if gene_count % countPrint == 0:
+                    print(f"extracting in progress… {gene_count} genes extracted")
+print(f"extracting finished {gene_count} genes extracted")
