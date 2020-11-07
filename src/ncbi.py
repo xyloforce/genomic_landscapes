@@ -11,7 +11,7 @@ import subprocess
 import json
 import zipfile
 import os
-import src.utilities
+from . import utilities
 
 
 PATH_DATASET = "./datasets"
@@ -119,7 +119,10 @@ def lineage(taxid):
     get only lineage from global taxonomy record
     """
     xml = taxonomy(taxid)
-    lineage = utilities.query_xpath("//Lineage")
+    lineage = utilities.query_xpath(xml, ".//Lineage")
+    lineage = lineage[0].text
+    lineage = lineage.split("; ")
+    lineage = lineage[15:]
     return lineage
 
 
