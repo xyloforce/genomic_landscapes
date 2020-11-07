@@ -11,6 +11,7 @@ import subprocess
 import json
 import zipfile
 import os
+import utilities
 
 
 PATH_DATASET = "./datasets"
@@ -52,7 +53,6 @@ def summary(type, value, subtype=None):
             return None
     else:
         print(f"error in command type of 'datasets summary type', type must are « gene » or « genome » not {type}")
-
 
 
 def get_genome(taxid):
@@ -102,6 +102,25 @@ def get_genome(taxid):
         return extracted_file_list
     else:
         print(f"error in command line : {error}")
+
+
+def taxonomy(taxid):
+    """
+    get info from corresponding database ncbi taxonomy
+    return xml
+    """
+    base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+    xml = utilities.get_xml(base_url, {"db": "taxonomy", "id": taxid, "rettype": "xml", "retmode": "text"})
+    return xml
+
+
+def lineage(taxid):
+    """
+    get only lineage from global taxonomy record
+    """
+    xml = taxonomy(taxid)
+    lineage = utilities.query_xpath("//Lineage")
+    return lineage
 
 
 #  test if datasets is installed
