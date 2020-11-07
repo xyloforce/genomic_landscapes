@@ -11,7 +11,7 @@ import subprocess
 import json
 import zipfile
 import os
-import utilities
+import src.utilities
 
 
 PATH_DATASET = "./datasets"
@@ -129,8 +129,13 @@ try:
     stdout, stderr = process.communicate()
     print(f"datasets is present and this version is {stdout.strip()}")
 except FileNotFoundError:
-    print("You have to datasets install on your computer, you can try : « python3 -m pip install ncbi-datasets-pylib »\nOr you can download datasets programme from « https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/LATEST/linux-amd64/datasets »")
-    sys.exit()
+    try:
+        process = subprocess.Popen("datasets version".split(), stdout=subprocess.PIPE, universal_newlines=True)
+        stdout, stderr = process.communicate()
+        print(f"datasets is present and this version is {stdout.strip()}")
+    except FileNotFoundError:
+        print("You have to install datasets on your computer, either try : « python3 -m pip install ncbi-datasets-pylib » or download datasets from « https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/LATEST/linux-amd64/datasets »")
+        sys.exit()
 
 if __name__ == '__main__':
     # print(summary("gene", 920835))
