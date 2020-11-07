@@ -9,6 +9,9 @@ import src.orthodb as orthodb
 import src.ncbi as ncbi
 
 
+PATH_TO_OG2genes = "orthodb_data/odb10v1_OG2genes.tab" # orthodb_data/odb10v1_OG2genes.tab
+PATH_TO_GENE_XREFS = "orthodb_data/odb10v1_gene_xrefs.tab"  # orthodb_data/odb10v1_gene_xrefs.tab
+
 def get_request(baseURL, payload):
     """
     function to make a request
@@ -80,7 +83,7 @@ else:
 if isNeeded(orthologs_groups, 'gene_ids.json'):
     # ====== get the orthologs IDs ====== #
     print("Searching contents of orthologs groups")
-    gene_ids = orthodb.orthologs(orthologs_groups, "orthodb_data/odb10v1_OG2genes.tab")  # gene_ids is dict
+    gene_ids = orthodb.orthologs(orthologs_groups, PATH_TO_OG2genes)  # gene_ids is dict
     with open('gene_ids.json', 'w') as json_file:
         json.dump(gene_ids, json_file)
 else:
@@ -90,7 +93,7 @@ else:
 if isNeeded(gene_ids, 'ncbi_gene_ids.json'):
     # ====== get the orthologs NCBI IDs ====== #
     print("Searching contents of orthologs groups")
-    ncbi_gene_ids = orthodb.ogdetails(gene_ids, "orthodb_data/odb10v1_gene_xrefs.tab")  # gene_ids is dict
+    ncbi_gene_ids = orthodb.ogdetails(gene_ids, PATH_TO_GENE_XREFS)  # gene_ids is dict
     with open('ncbi_gene_ids.json', 'w') as json_file:
         json.dump(ncbi_gene_ids, json_file)
 else:
