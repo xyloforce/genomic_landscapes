@@ -5,6 +5,7 @@ import csv
 
 import src.orthodb as orthodb
 import src.ncbi as ncbi
+import classSpecies
 
 
 PATH_TO_OG2genes = "orthodb_data/odb10v1_OG2genes.tab" # orthodb_data/odb10v1_OG2genes.tab
@@ -80,15 +81,23 @@ else:
     with open('ncbi_gene_ids.json') as json_file:
         gene_ids = json.load(json_file)
 
-csv_file = open("species_gene_humanortho.csv", "w", newline="")
-fieldnames = ["human_gene", "species", "taxid", "geneID"]
-writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-writer.writeheader()
+species_dict = dict()
 
 for gene in ncbi_gene_ids:
     query_dict = ncbi.summary(" gene gene-id ", " ".join(ncbi_gene_ids[gene]))
     for ortholog in query_dict["genes"]:
-        writer.writerow({"human_gene": gene,
+        taxid = ortholog["gene"]["tax_id"]
+        if taxid not in species_dict:
+            lineage = ncbi.lineage(taxid)
+            species_dict[taxid] = classSpecies.species(taxid, ortholog["gene"]["taxname"], lineage)
+        species_dict[taxid].add_gene(gene, ortholog["gene"]["gene_id"])
+        
+
+csv_file = open("species_gene_humanortho.csv", "w", newline="")
+fieldnames = ["human_gene", "species", "taxid", "geneID"]
+writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+writer.writeheader()
+writer.writerow({"human_gene": gene,
                          "species": ortholog["gene"]["taxname"],
                          "taxid": ortholog["gene"]["tax_id"],
                          "geneID": ortholog["gene"]["gene_id"]})
