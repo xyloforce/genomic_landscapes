@@ -1,6 +1,4 @@
 import json
-import time
-import requests
 import subprocess
 import sys
 import csv
@@ -11,6 +9,7 @@ import src.ncbi as ncbi
 
 PATH_TO_OG2genes = "orthodb_data/odb10v1_OG2genes.tab" # orthodb_data/odb10v1_OG2genes.tab
 PATH_TO_GENE_XREFS = "orthodb_data/odb10v1_gene_xrefs.tab"  # orthodb_data/odb10v1_gene_xrefs.tab
+
 
 def isNeeded(old_dic, saved_json):
     """

@@ -1,3 +1,7 @@
+import json
+import xml.etree.ElementTree
+import requests
+import time
 ## some functions who can't go anywhere else
 
 def get_request(baseURL, payload):
@@ -24,7 +28,7 @@ def get_data(baseURL, payload):
         try:
             request = get_request(baseURL, payload)
             data = request.json()["data"]
-        except (ValueError, simplejson.errors.JSONDecodeError):
+        except ValueError:
             print("Error : JSON invalid. Retrying...")
         else:
             retry = False
@@ -35,12 +39,12 @@ def get_xml(baseURL, payload):
     while retry:  # RETRY UNTIL SUCCES U SONOFAGUN
         try:
             request = get_request(baseURL, payload)
-            data = xml.etree.ElementTree.parse(request.text())
-        except (ValueError, simplejson.errors.JSONDecodeError):
+            data = xml.etree.ElementTree.fromstring(request.text)
+        except ValueError:
             print("Error : XML invalid. Retrying...")
         else:
             retry = False
     return data
 
 def query_xpath(xml, xpath):
-    return xml.tree.findall(xpath)
+    return xml.findall(xpath)
