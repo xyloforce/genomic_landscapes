@@ -12,25 +12,6 @@ import src.ncbi as ncbi
 PATH_TO_OG2genes = "orthodb_data/odb10v1_OG2genes.tab" # orthodb_data/odb10v1_OG2genes.tab
 PATH_TO_GENE_XREFS = "orthodb_data/odb10v1_gene_xrefs.tab"  # orthodb_data/odb10v1_gene_xrefs.tab
 
-def get_request(baseURL, payload):
-    """
-    function to make a request
-    """
-    retry = True
-    while retry:  # RETRY UNTIL SUCCES U SONOFAGUN
-        time.sleep(1)
-        try:
-            request = requests.get(baseURL, params=payload)
-        except (requests.ConnectionError, requests.HTTPError, requests.Timeout):
-            print("Error : connection failed. Retrying...")
-        except ValueError:
-            print("Error : JSON invalid. Retrying...")
-        else:
-            retry = False
-    print("Requested " + request.url)
-    return request
-
-
 def isNeeded(old_dic, saved_json):
     """
     check if an existing file is complete
@@ -72,7 +53,7 @@ with open(sys.argv[1]) as json_file:
 # ====== get the orthologs groups ====== #
 if isNeeded2(genomeGenesList, 'orthologs_groups.json'):
     print("Searching orthologs")
-    # Request NCBI and create a dict
+    # Request NCBI and create a dict of human_gene:groups
     orthologs_groups = orthodb.search(genomeGenesList)
     with open('orthologs_groups.json', 'w') as json_file:
         json.dump(orthologs_groups, json_file)
@@ -83,7 +64,7 @@ else:
 if isNeeded(orthologs_groups, 'gene_ids.json'):
     # ====== get the orthologs IDs ====== #
     print("Searching contents of orthologs groups")
-    gene_ids = orthodb.orthologs(orthologs_groups, PATH_TO_OG2genes)  # gene_ids is dict
+    gene_ids = orthodb.orthologs(orthologs_groups, PATH_TO_OG2genes)  # gene_ids is dict of human:(orthodb_geneids)
     with open('gene_ids.json', 'w') as json_file:
         json.dump(gene_ids, json_file)
 else:
@@ -93,7 +74,7 @@ else:
 if isNeeded(gene_ids, 'ncbi_gene_ids.json'):
     # ====== get the orthologs NCBI IDs ====== #
     print("Searching contents of orthologs groups")
-    ncbi_gene_ids = orthodb.ogdetails(gene_ids, PATH_TO_GENE_XREFS)  # gene_ids is dict
+    ncbi_gene_ids = orthodb.ogdetails(gene_ids, PATH_TO_GENE_XREFS)  # ncbi gene_ids is dict of human:(ncbi_geneids)
     with open('ncbi_gene_ids.json', 'w') as json_file:
         json.dump(ncbi_gene_ids, json_file)
 else:

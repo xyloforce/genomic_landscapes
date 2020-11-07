@@ -10,27 +10,7 @@ import json
 import csv
 import time
 import simplejson
-
-
-def get_data(baseURL, payload):
-    """
-    function to make a correct request
-    """
-    retry = True
-    while retry:  # RETRY UNTIL SUCCES U SONOFAGUN
-        time.sleep(1)
-        try:
-            # request add to the baseURL the params passed as dict
-            request = requests.get(baseURL, params=payload)
-            data = request.json()["data"]
-        except (requests.ConnectionError, requests.HTTPError, requests.Timeout):
-            print("Error : connection failed. Retrying...")
-        except (ValueError, simplejson.errors.JSONDecodeError):
-            print("Error : JSON invalid. Retrying...")
-        else:
-            retry = False
-    print("Requested " + request.url)
-    return data
+import utilities
 
 
 def search(genes, ncbi=1, level=32523):
@@ -39,8 +19,8 @@ def search(genes, ncbi=1, level=32523):
     """
     groups = dict()
     for gene in genes:
-        data = get_data("https://www.orthodb.org/search",
-                        {'query': gene, 'ncbi': ncbi, 'level': level})
+        data = utilities.get_data("https://www.orthodb.org/search",
+                                  {'query': gene, 'ncbi': ncbi, 'level': level})
         groups[gene] = data
     return groups
 
