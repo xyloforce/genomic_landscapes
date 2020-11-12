@@ -10,6 +10,8 @@
 import sys
 import re
 
+VERBEUX = True
+
 
 def get_gene_ID(csvFile, taxid):
     """
@@ -40,11 +42,11 @@ def parsingGFF(geneIDlist, fileGFF):
             return True
         return False
 
-    introns = {}
     exons = {}
     limitsGenes = {}
     with open(fileGFF, 'r') as file:
-        regex = "(exon|gene).(\d).(\d).+GeneID:(\d+)"
+        regex = "(exon|gene).(\d+).(\d+).+GeneID:(\d+)"
+        # group :: 2 start ; 3 stop ; 4 GeneID
         for line in file:
             match = re.search(regex, line)
             if match is None:
@@ -55,29 +57,39 @@ def parsingGFF(geneIDlist, fileGFF):
                     limitsGenes[match.group(4)] = (match.group(2), match.group(3))
                 if match.group(1) == "exon":
                     try:
+                        # test if exon in gene limit
                         if inGene(match.group(4), match.group(2), match.group(3)):
                             # recording exons
                             if match.group(4) not in exons:
-                                exons[match.group(4)] = []
-                            # TODO: fin exon final - start exon 1 - Σ(exons)
-                            exons[match.group(4)].append(int(match.group(3)) - int(match.group(2)) + 1)
+                                exons[match.group(4)] = {}
+                            # get numero of exon
+                            exonID = re.search("ID=exon-.+-(\d+);", line)
+                            if exonID is None:
+                                print(f"No ID exon found for gene {match.group(4)}")
+                            exons[match.group(4)][int(exonID.group(1))] = (int(match.group(2)), int(match.group(3)))
                     except Exception as e:
                         print(e)
     # calculating introns size
-    for gene in limitsGenes:
-        sizeGene = int(limitsGenes[gene][0]) - int(limitsGenes[gene][1])
+    introns = {}
+    count = 0
+    for gene in exons:
+        # calculating size RNA : stop last exon - start first exon + 1
+        sizeRNA = abs(exons[gene][min(exons[gene])][1] - exons[gene][max(exons[gene])][0] + 1)  # abs for cause strand
         sizeExon = 0
-        try:
-            for size in exons[gene]:
-                sizeExon += size
-            introns[gene] = sizeGene - sizeExon
-        except KeyError:
-            pass
+        for numExon in exons[gene]:
+            sizeExon += exons[gene][numExon][1] - exons[gene][numExon][0] + 1
+        if sizeRNA - sizeExon < 0:
+            count += 1
+            continue
+        else:
+            introns[gene] = sizeRNA - sizeExon
 
-    print("debug")
-    print(len(limitsGenes))
-    print(len(exons))
-    print(len(introns))
+    if VERBEUX:
+        print("Statistic")
+        print(f"{len(limitsGenes)} genes found from GFF")
+        print(f"{len(exons)} exons total")
+        print(f"{len(introns)} introns calculated")
+        print(f"{count} introns exclude")
     return introns
 
 
@@ -86,7 +98,7 @@ if __name__ == '__main__':
     intronSizeCalculated = parsingGFF(geneID, sys.argv[3])
     count = 0
     for gene in intronSizeCalculated:
-        if count <= 5:
+        if count <= 10:
             print(f"gene {gene} have introns size of {intronSizeCalculated[gene]}")
             count += 1
         else:
