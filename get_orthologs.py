@@ -91,13 +91,9 @@ for gene in ncbi_gene_ids:
             lineage = ncbi.lineage(taxid)
             species_dict[taxid] = classSpecies.species(taxid, ortholog["gene"]["taxname"], lineage)
         species_dict[taxid].add_gene(gene, ortholog["gene"]["gene_id"])
-        
 
-csv_file = open("species_gene_humanortho.csv", "w", newline="")
-fieldnames = ["human_gene", "species", "taxid", "geneID"]
-writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-writer.writeheader()
-writer.writerow({"human_gene": gene,
-                         "species": ortholog["gene"]["taxname"],
-                         "taxid": ortholog["gene"]["tax_id"],
-                         "geneID": ortholog["gene"]["gene_id"]})
+for species in species_dict:
+    species.set_lineage(lineage(species.get_taxid()))
+
+for species in species_dict:
+    species.export_species("species/")

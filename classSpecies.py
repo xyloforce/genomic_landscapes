@@ -21,7 +21,7 @@ class species:
             self.genes[human_gene] = list()
         self.genes[human_gene].append(ortholog)
         
-    def export_species(self):
+    def export_species(self, path="./"):
         genes_species = self.taxid + "_genes.json"
         with open(genes_species, "w") as file_genes:
             json.dump(self.genes, file_genes)
@@ -29,7 +29,7 @@ class species:
         with open(info_species, "w") as file_infos:
             file_infos.write(self.species)
             file_infos.write(self.lineage)
-        compressed = self.taxid + ".zip"
+        compressed = path + self.taxid + ".zip"
         with zipfile.ZipFile(compressed, "w") as file_archive:
             file_archive.write(genes_species)
             file_archive.write(info_species)
@@ -43,7 +43,7 @@ class species:
         self.genes = genes
     
     def set_name(self, name):
-        self.species = names
+        self.species = name
     
     def get_genes(self):
         return self.genes
