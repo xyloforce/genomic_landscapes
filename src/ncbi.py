@@ -11,6 +11,7 @@ import subprocess
 import json
 import zipfile
 import os
+from . import utilities
 
 
 PATH_DATASET = "./datasets"
@@ -53,7 +54,6 @@ def summary(type, value, subtype=None):
             return None
     else:
         print(f"error in command type of 'datasets summary type', type must are « gene » or « genome » not {type}")
-
 
 
 def get_genome(taxid):
@@ -105,14 +105,41 @@ def get_genome(taxid):
         print(f"error in command line : {error}")
 
 
+def taxonomy(taxid):
+    """
+    get info from corresponding database ncbi taxonomy
+    return xml
+    """
+    base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+    xml = utilities.get_xml(base_url, {"db": "taxonomy", "id": taxid, "rettype": "xml", "retmode": "text"})
+    return xml
+
+
+def lineage(taxid):
+    """
+    get only lineage from global taxonomy record
+    """
+    xml = taxonomy(taxid)
+    lineage = utilities.query_xpath(xml, ".//Lineage")
+    lineage = lineage[0].text
+    lineage = lineage.split("; ")
+    lineage = lineage[15:]
+    return lineage
+
+
 #  test if datasets is installed
 try:
     process = subprocess.Popen("./datasets version".split(), stdout=subprocess.PIPE, universal_newlines=True)
     stdout, stderr = process.communicate()
     print(f"datasets is present and this version is {stdout.strip()}")
 except FileNotFoundError:
-    print("You have to datasets install on your computer, you can try : « python3 -m pip install ncbi-datasets-pylib »\nOr you can download datasets programme from « https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/LATEST/linux-amd64/datasets »")
-    sys.exit()
+    try:
+        process = subprocess.Popen("datasets version".split(), stdout=subprocess.PIPE, universal_newlines=True)
+        stdout, stderr = process.communicate()
+        print(f"datasets is present and this version is {stdout.strip()}")
+    except FileNotFoundError:
+        print("You have to install datasets on your computer, either try : « python3 -m pip install ncbi-datasets-pylib » or download datasets from « https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/LATEST/linux-amd64/datasets »")
+        sys.exit()
 
 if __name__ == '__main__':
     # print(summary("gene", 920835))

@@ -5,11 +5,8 @@
 # Library python for project M1 2020
 # version 0.2
 ##########################################################
-import requests
-import json
 import csv
 import time
-import simplejson
 import utilities
 
 
