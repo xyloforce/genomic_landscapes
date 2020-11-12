@@ -7,7 +7,7 @@
 ##########################################################
 import csv
 import time
-import utilities
+from . import utilities
 
 
 def search(genes, ncbi=1, level=32523):
