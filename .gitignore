@@ -1,0 +1,5 @@
+src/__pycache__/*
+orthodb_data/*
+logs/*
+*.zip
+*.gff

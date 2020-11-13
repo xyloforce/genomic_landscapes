@@ -18,6 +18,7 @@ PATH_DATASET = "./datasets"
 PATH_TO_DATA_DL = "/tmp/genome/"  # don’t forget / at end
 SUBTYPE_LIST = ["accession", "taxon", "gene-id", "symbol"]  # from NCBI documentation
 VERBOSE = True  # simple verbose mode, recommandation to false
+# TODO: dataset path
 
 
 def summary(type, value, subtype=None):
