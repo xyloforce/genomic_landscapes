@@ -59,3 +59,20 @@ class species:
 
     def __repr__(self): # just to check that it works well
         return str(len(self.genes))
+    
+
+def build_back_species(filename):
+    taxid = filename.split(".")[0]
+    species_restored = ClassSpecies.species(taxid)
+    with zipfile.ZipFile(filename) as archive:
+        archive.extractall(".")
+    genes_species = taxid + "_genes.json"
+    with open(genes_species, "w") as file_genes:
+        species_restored.set_genes(json.load(file_genes))
+    info_species = taxid + "_infos_species.txt"
+    with open(info_species, "w") as file_infos:
+        species_restored.set_name(file_infos.readline().rstrip())
+        species_restored.set_lineage(file_infos.readline().rstrip())
+    os.remove(genes_species)
+    os.remove(info_species)
+    return species_restored
