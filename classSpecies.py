@@ -63,7 +63,7 @@ class species:
 
 def build_back_species(filename):
     taxid = filename.split(".")[0]
-    species_restored = ClassSpecies.species(taxid)
+    species_restored = species(taxid)
     with zipfile.ZipFile(filename) as archive:
         archive.extractall(".")
     genes_species = taxid + "_genes.json"
@@ -72,7 +72,7 @@ def build_back_species(filename):
     info_species = taxid + "_infos_species.txt"
     with open(info_species, "w") as file_infos:
         species_restored.set_name(file_infos.readline().rstrip())
-        species_restored.set_lineage(file_infos.readline().rstrip())
+        species_restored.set_lineage(file_infos.readline().rstrip().split(";"))
     os.remove(genes_species)
     os.remove(info_species)
     return species_restored
