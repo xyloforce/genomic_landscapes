@@ -39,13 +39,13 @@ def summary(type, value, subtype=None):
             print(f"subtype {subtype} incorrect")
             return None
 
+        retry = True
+        try_count = 0
         #  execute command
-        process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, universal_newlines=True)
-        output, error = process.communicate()
-        if error is None:
-            retry = True
-            try_count = 0
-            while retry:
+        while retry:
+            process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, universal_newlines=True)
+            output, error = process.communicate()
+            if error is None:
                 try:
                     query_dict = json.loads(output)
                     return query_dict
@@ -59,9 +59,9 @@ def summary(type, value, subtype=None):
                 except Exception as e:
                     print(f"error catch {e}")
                     raise Exception("An unexpected error happened : please read the error message")
-        else:
-            print(f"Error in CLI : {error}")
-            return None
+            else:
+                print(f"Error in CLI : {error}")
+                return None
     else:
         print(f"error in command type of 'datasets summary type', type must are « gene » or « genome » not {type}")
 
