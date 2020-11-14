@@ -30,40 +30,56 @@ def summary(type, value, subtype=None):
     type is gene or genome
     subtype is optionnel and from SUBTYPE_LIST
     """
-    if type == "gene" or type == "genome":
-        if subtype is None:
-            command = ' '.join((PATH_DATASET, "summary", type, "gene-id", str(value)))
-        elif subtype in SUBTYPE_LIST:
-            command = ' '.join((PATH_DATASET, "summary", type, subtype, str(value)))
+    value = value.split(" ")
+    count = 0
+    requested_values = ""
+    result_dic = {"gene": list()}
+    for gene_id in value:
+        if count < 15:
+            requested_values = requested_values + gene_id + " "
+            count += 1
         else:
-            print(f"subtype {subtype} incorrect")
-            return None
-
-        retry = True
-        try_count = 0
-        #  execute command
-        while retry:
-            process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, universal_newlines=True)
-            output, error = process.communicate()
-            if error is None:
-                try:
-                    query_dict = json.loads(output)
-                    return query_dict
-                except ValueError:
-                    print(command)
-                    if try_count < 3:
-                        print("Value error catched, retrying")
-                        try_count += 1
-                    else:
-                        raise Exception("An unexpected error happened : please read the error message")
-                except Exception as e:
-                    print(f"error catch {e}")
-                    raise Exception("An unexpected error happened : please read the error message")
+            requested_values = requested_values + gene_id + " " # avoid missing a gene ID
+            count = 0 # reset counter
+            if type == "gene" or type == "genome":
+                if subtype is None:
+                    command = ' '.join((PATH_DATASET, "summary", type, "gene-id", str(value)))
+                elif subtype in SUBTYPE_LIST:
+                    command = ' '.join((PATH_DATASET, "summary", type, subtype, str(value)))
+                else:
+                    raise Exception("Wrong subtype provided")
             else:
-                print(f"Error in CLI : {error}")
-                return None
-    else:
-        print(f"error in command type of 'datasets summary type', type must are « gene » or « genome » not {type}")
+                print(f"error in command type of 'datasets summary type', type must are « gene » or « genome » not {type}")
+                raise Exception("Wrong type provided")
+            retry = True
+            try_count = 0
+            #  execute command
+            while retry:
+                process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, universal_newlines=True)
+                output, error = process.communicate()
+                if error is None:
+                    try:
+                        query_dict = json.loads(output)
+                    except ValueError:
+                        print(command)
+                        if try_count < 3:
+                            print("Value error catched, retrying")
+                            try_count += 1
+                        else:
+                            raise Exception("An unexpected error happened : please read the error message")
+                    except Exception as e:
+                        print(f"error catch {e}")
+                        raise Exception("An unexpected error happened : please read the error message")
+                    else:
+                        retry = False
+                else:
+                    print(f"Error in CLI : {error}")
+                    return None
+            # query_dict is a success
+            result_dic["genes"].extend(query_dict["genes"])
+            requested_values = ""
+    # end of the list of values
+    return result_dic
 
 
 def get_genome(taxid):
