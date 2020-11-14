@@ -84,7 +84,7 @@ else:
 species_dict = dict()
 
 for gene in ncbi_gene_ids:
-    query_dict = ncbi.summary(" gene gene-id ", " ".join(ncbi_gene_ids[gene]))
+    query_dict = ncbi.summary("gene", ncbi_gene_ids[gene], "gene-id")
     for ortholog in query_dict["genes"]:
         taxid = ortholog["gene"]["tax_id"]
         if taxid not in species_dict:
