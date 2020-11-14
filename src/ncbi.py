@@ -43,9 +43,9 @@ def summary(type, value, subtype=None):
             count = 0 # reset counter
             if type == "gene" or type == "genome":
                 if subtype is None:
-                    command = ' '.join((PATH_DATASET, "summary", type, "gene-id", str(value)))
+                    command = ' '.join((PATH_DATASET, "summary", type, "gene-id", str(requested_values)))
                 elif subtype in SUBTYPE_LIST:
-                    command = ' '.join((PATH_DATASET, "summary", type, subtype, str(value)))
+                    command = ' '.join((PATH_DATASET, "summary", type, subtype, str(requested_values)))
                 else:
                     raise Exception("Wrong subtype provided")
             else:
