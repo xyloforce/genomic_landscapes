@@ -44,17 +44,21 @@ def summary(type, value, subtype=None):
         output, error = process.communicate()
         if error is None:
             retry = True
+            try_count = 0
             while retry:
                 try:
                     query_dict = json.loads(output)
                     return query_dict
                 except ValueError:
-                    print("Value error catched, retrying")
+                    print(command)
+                    if try_count < 3:
+                        print("Value error catched, retrying")
+                        try_count += 1
+                    else:
+                        raise Exception("An unexpected error happened : please read the error message")
                 except Exception as e:
                     print(f"error catch {e}")
                     raise Exception("An unexpected error happened : please read the error message")
-                else:
-                    retry = False
         else:
             print(f"Error in CLI : {error}")
             return None
