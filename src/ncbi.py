@@ -43,12 +43,18 @@ def summary(type, value, subtype=None):
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, universal_newlines=True)
         output, error = process.communicate()
         if error is None:
-            try:
-                query_dict = json.loads(output)
-                return query_dict
-            except Exception as e:
-                print(f"error catch {e}")
-                return None
+            retry = True
+            while retry:
+                try:
+                    query_dict = json.loads(output)
+                    return query_dict
+                except ValueError:
+                    print("Value error catched, retrying")
+                except Exception as e:
+                    print(f"error catch {e}")
+                    raise Exception("An unexpected error happened : please read the error message")
+                else:
+                    retry = False
         else:
             print(f"Error in CLI : {error}")
             return None
