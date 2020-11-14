@@ -79,7 +79,7 @@ if isNeeded(gene_ids, 'ncbi_gene_ids.json'):
         json.dump(ncbi_gene_ids, json_file)
 else:
     with open('ncbi_gene_ids.json') as json_file:
-        gene_ids = json.load(json_file)
+        ncbi_gene_ids = json.load(json_file)
 
 species_dict = dict()
 
