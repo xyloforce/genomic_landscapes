@@ -33,7 +33,7 @@ def summary(type, value, subtype=None):
     value = value.split(" ")
     count = 0
     requested_values = ""
-    result_dic = {"gene": list()}
+    result_dic = {"genes": list()}
     for gene_id in value:
         if count < 15:
             requested_values = requested_values + gene_id + " "
