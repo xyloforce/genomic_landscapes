@@ -3,14 +3,16 @@
 
 ##########################################################
 # Library python for project M1 2020
-# version 0.1
+# version 0.2
 # datasets version use is 10.5
 ##########################################################
 
 import sys
 import re
+import os
+import json
 
-VERBEUX = True
+VERBEUX = False
 
 
 def get_gene_ID(csvFile, taxid):
@@ -30,7 +32,7 @@ def get_gene_ID(csvFile, taxid):
     return geneID
 
 
-def parsingGFF(geneIDlist, fileGFF):
+def parsingGFF(geneIDlist, fileGFF, taxid):
     """
     Get start and stop exon from GFF file.
 
@@ -70,7 +72,7 @@ def parsingGFF(geneIDlist, fileGFF):
                     except Exception as e:
                         print(e)
     # calculating introns size
-    introns = {}
+    introns = {"taxid": taxid}
     count = 0
     for gene in exons:
         # calculating size RNA : stop last exon - start first exon + 1
@@ -95,11 +97,19 @@ def parsingGFF(geneIDlist, fileGFF):
 
 if __name__ == '__main__':
     geneID = (get_gene_ID(sys.argv[1], sys.argv[2]))
-    intronSizeCalculated = parsingGFF(geneID, sys.argv[3])
-    count = 0
-    for gene in intronSizeCalculated:
-        if count <= 10:
-            print(f"gene {gene} have introns size of {intronSizeCalculated[gene]}")
-            count += 1
-        else:
-            break
+    intronSizeCalculated = parsingGFF(geneID, sys.argv[3], sys.argv[2])
+    if VERBEUX:
+        count = 0
+        for gene in intronSizeCalculated:
+            if count <= 10:
+                print(f"gene {gene} have introns size of {intronSizeCalculated[gene]}")
+                count += 1
+            else:
+                break
+    else:
+        if not os.path.isdir("metric/export"):
+            os.mkdir("metric/export")
+        filename = sys.argv[3].split('.')[0]
+        f = open(f"metric/export/{filename}.json", 'w')
+        f.write(json.dumps(intronSizeCalculated))  # no inmdent to minimize file size
+        f.close()

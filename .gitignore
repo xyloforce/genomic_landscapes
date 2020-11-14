@@ -3,3 +3,6 @@ orthodb_data/*
 logs/*
 *.zip
 *.gff
+*.pyc
+.Rproj.user
+.Rhistory

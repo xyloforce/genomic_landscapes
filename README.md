@@ -25,3 +25,18 @@ Modification possible à faire dans le script :
 
 - url du génome (ftp://ftp.ncbi.nlm.nih.gov/genomes/all/annotation_releases/9606/109.20200815/GCF_000001405.39_GRCh38.p13/GCF_000001405.39_GRCh38.p13_genomic.gff.gz)
 - version des database d’orthodb (`OGs to genes correspondence` and `xrefs associated with Ortho DB gene` from https://www.orthodb.org/?page=filelist)
+
+### Calcul des métriques
+
+Les scripts de calculs sont dans le dossier `metric`.
+
+#### Taille des introns
+
+C’est le script `intronSize.py` qui s’en occupe et le script `exportCsv.py` se charge de la concaténation dans un csv
+
+```shell
+python metric/intronSize.py [results.csv] [taxid number] [genomic.gff]
+python metric/exportCsv.py
+```
+
+Les sorties se trouvent dans `metric/data` pour `intronSize.py` et le fichier `alexendria.csv` est le csv importable dans R pour la génération de la heatmap.
