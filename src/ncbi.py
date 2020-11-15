@@ -11,6 +11,7 @@ import subprocess
 import json
 import zipfile
 import os
+import time
 from . import utilities
 
 
@@ -62,8 +63,9 @@ def summary(type, value, subtype=None):
                         query_dict = json.loads(output)
                     except ValueError:
                         print(command)
-                        if try_count < 3:
-                            print("Value error catched, retrying")
+                        if try_count < 10:
+                            print("Value error catched, retrying in " + str(try_count) + " seconds")
+                            time.sleep(1*try_count)
                             try_count += 1
                         else:
                             raise Exception("An unexpected error happened : please read the error message")
