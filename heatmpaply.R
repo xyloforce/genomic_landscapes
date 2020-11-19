@@ -3,6 +3,14 @@ DF <-  data.frame(replicate(10, sample(0:100, 10, rep=TRUE)))
 rownames(DF) <- paste("species", as.character(1:10), sep="")
 colnames(DF) <- c(1:10)#paste("gene", as.character(1:100), sep="")
 
+D1 <- read.table("data9606.csv", header=F, sep=',')
+D2 <- read.table("data10020.csv", header=F, sep=',')
+
+D <- D1[1,]
+D <- rbind(D1, D2[1,])
+
+DF <- read.table("metric/alexandria.csv", header=T, sep=',')
+
 ## force value for exemple
 DF$"1"[1] = 0
 DF$"1"[2] = 100
@@ -13,7 +21,7 @@ DF2 <- data.matrix(DF)
 # heatmap
 myColor <- colorRampPalette(c("white", "purple4")) # low to hight
 
-heatmap(DF2, col=myColor(n = 100))
+heatmap(DF2, col=myColor(n = 1000))
 
 
 
