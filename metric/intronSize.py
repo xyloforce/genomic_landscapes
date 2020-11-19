@@ -50,6 +50,8 @@ def parsingGFF(geneIDlist, fileGFF, taxid):
         regex = "(exon|gene).(\d+).(\d+).+GeneID:(\d+)"
         # group :: 2 start ; 3 stop ; 4 GeneID
         for line in file:
+            if line[0] == '#':
+                continue
             match = re.search(regex, line)
             if match is None:
                 continue
@@ -68,6 +70,9 @@ def parsingGFF(geneIDlist, fileGFF, taxid):
                             exonID = re.search("ID=exon-.+-(\d+);", line)
                             if exonID is None:
                                 print(f"No ID exon found for gene {match.group(4)}")
+                                # delete exon
+                                print("gene ID deleted : ", end="")
+                                exons.pop(match.group(4))
                             exons[match.group(4)][int(exonID.group(1))] = (int(match.group(2)), int(match.group(3)))
                     except Exception as e:
                         print(e)
@@ -109,7 +114,12 @@ if __name__ == '__main__':
     else:
         if not os.path.isdir("metric/export"):
             os.mkdir("metric/export")
-        filename = sys.argv[3].split('.')[0]
+        # creating of filename json
+        if '/' in sys.argv[3]:
+            buffer = sys.argv[3].split('/')[-1]
+            filename = buffer.split('.')[0]
+        else:
+            filename = sys.argv[3].split('.')[0]
         f = open(f"metric/export/{filename}.json", 'w')
         f.write(json.dumps(intronSizeCalculated))  # no inmdent to minimize file size
         f.close()

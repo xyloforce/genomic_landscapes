@@ -48,7 +48,7 @@ for file in os.listdir("metric/export"):
 
 
 # write result in csv
-f = open("metric/alexendria.csv", 'w')
+f = open("metric/alexandria.csv", 'w')
 
 # create a reference
 if taxidRef in allGene:
@@ -85,4 +85,4 @@ for taxid in allGene:
     row += '\n'
     f.write(row)
 f.close()
-print("INFO : Alexendria was built…")
+print("INFO : Alexandria was built…")
