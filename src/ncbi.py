@@ -31,58 +31,55 @@ def summary(type, value, subtype=None):
     type is gene or genome
     subtype is optionnel and from SUBTYPE_LIST
     """
-    value = value.split(" ")
-    count = 0
-    requested_values = ""
-    result_dic = {"genes": list()}
-    for gene_id in value:
-        if count < 15:
-            requested_values = requested_values + gene_id + " "
-            count += 1
+    if type == "gene" or type == "genome":
+        if subtype is None:
+            command = ' '.join((PATH_DATASET, "summary", type, "gene-id", str(value)))
+        elif subtype in SUBTYPE_LIST:
+            command = ' '.join((PATH_DATASET, "summary", type, subtype, str(value)))
         else:
-            requested_values = requested_values + gene_id + " " # avoid missing a gene ID
-            count = 0 # reset counter
-            if type == "gene" or type == "genome":
-                if subtype is None:
-                    command = ' '.join((PATH_DATASET, "summary", type, "gene-id", str(requested_values)))
-                elif subtype in SUBTYPE_LIST:
-                    command = ' '.join((PATH_DATASET, "summary", type, subtype, str(requested_values)))
+            raise Exception("Wrong subtype provided")
+    else:
+        print(f"error in command type of 'datasets summary type', type must be « gene » or « genome » not {type}")
+        raise Exception("Wrong type provided")
+    retry = True
+    try_count = 0
+    #  execute command
+    while retry:
+        process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, universal_newlines=True)
+        output, error = process.communicate()
+        if error is None:
+            try:
+                query_dict = json.loads(output)
+            except ValueError:
+                print(command)
+                if try_count < 10:
+                    print("Value error catched, retrying in " + str(try_count) + " seconds")
+                    time.sleep(1*try_count)
+                    try_count += 1
                 else:
-                    raise Exception("Wrong subtype provided")
+                    raise Exception("An unexpected error happened : please read the error message")
+            except Exception as e:
+                print(f"error catch {e}")
+                raise Exception("An unexpected error happened : please read the error message")
             else:
-                print(f"error in command type of 'datasets summary type', type must are « gene » or « genome » not {type}")
-                raise Exception("Wrong type provided")
-            retry = True
-            try_count = 0
-            #  execute command
-            while retry:
-                process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, universal_newlines=True)
-                output, error = process.communicate()
-                if error is None:
-                    try:
-                        query_dict = json.loads(output)
-                    except ValueError:
-                        print(command)
-                        if try_count < 10:
-                            print("Value error catched, retrying in " + str(try_count) + " seconds")
-                            time.sleep(1*try_count)
-                            try_count += 1
-                        else:
-                            raise Exception("An unexpected error happened : please read the error message")
-                    except Exception as e:
-                        print(f"error catch {e}")
-                        raise Exception("An unexpected error happened : please read the error message")
-                    else:
-                        retry = False
-                else:
-                    print(f"Error in CLI : {error}")
-                    return None
-            # query_dict is a success
-            result_dic["genes"].extend(query_dict["genes"])
-            requested_values = ""
-    # end of the list of values
-    return result_dic
+                retry = False
+        else:
+            print(f"Error in CLI : {error}")
+            return None
+    return query_dict
 
+def summary_genes(values):
+    values = values.split()
+    count = 0
+    repeat = True
+    result_dict = {"genes":list()}
+    while count < len(values):
+        to_request = " ".join(values[count:count+15])
+        print(to_request)
+        middle_dict = summary("gene", to_request, "gene-id")
+        result_dict["genes"].extend(middle_dict["genes"])
+        count += 15
+    return result_dict
 
 def get_genome(taxid):
     """
