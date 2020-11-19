@@ -12,7 +12,7 @@ import json
 import zipfile
 import os
 import time
-from . import utilities
+import utilities
 
 
 PATH_DATASET = "./datasets"
@@ -116,11 +116,17 @@ def get_genome(taxid):
                 # checking path conditions
                 if not os.path.exists(PATH_TO_DATA_DL):
                     print(f"[Info] {PATH_TO_DATA_DL} not existed, so will create")
+                    os.mkdir(PATH_TO_DATA_DL)
                 if os.path.isfile(PATH_TO_DATA_DL + archive_file):
                     print(f"[Warning] {PATH_TO_DATA_DL + archive_file} destination is a file and will rewrite")
                 try:
-                    downloaded_file.extract(archive_file, path=PATH_TO_DATA_DL)
-                    extracted_file_list.append(PATH_TO_DATA_DL + archive_file)
+                    # downloaded_file.extract(archive_file, path=PATH_TO_DATA_DL)
+                    #extracted_file_list.append(PATH_TO_DATA_DL + archive_file)
+                    extension = file_to_extract.split(".")[-1]
+                    pathFile = PATH_TO_DATA_DL + accession + '.' + extension
+                    with open(pathFile, 'wb') as f:
+                        f.write(downloaded_file.read(archive_file))
+                        extracted_file_list.append(pathFile)
                     print(f"{file_to_extract} extracted")
                 except NotADirectoryError as e:
                     # print(f"Error with path destination ({str(e).split()[-1]})")
@@ -167,6 +173,15 @@ except FileNotFoundError:
         sys.exit()
 
 if __name__ == '__main__':
-    # print(summary("gene", 920835))
-    get_genome(2697049)
-    pass
+    """
+    arguments are :
+    1 : get or exe
+    2 : taxid
+    """
+    if sys.argv[1] == "get":
+        print(summary("genome", sys.argv[2], "taxon"))
+    elif sys.argv[1] == "exe":
+        files = get_genome(sys.argv[2])  # test possible with 920835 or 2697049
+        print(f"your files are in {files}")
+    else:
+        print("First argument unvailable, please choice between get or exe")

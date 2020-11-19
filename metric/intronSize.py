@@ -114,7 +114,12 @@ if __name__ == '__main__':
     else:
         if not os.path.isdir("metric/export"):
             os.mkdir("metric/export")
-        filename = sys.argv[3].split('.')[0]
+        # creating of filename json
+        if '/' in sys.argv[3]:
+            buffer = sys.argv[3].split('/')[-1]
+            filename = buffer.split('.')[0]
+        else:
+            filename = sys.argv[3].split('.')[0]
         f = open(f"metric/export/{filename}.json", 'w')
         f.write(json.dumps(intronSizeCalculated))  # no inmdent to minimize file size
         f.close()
