@@ -57,9 +57,8 @@ def summary(type, value, subtype=None):
                     time.sleep(1*try_count)
                     try_count += 1
                 else:
-                    raise Exception("An unexpected error happened : please read the error message")
+                    raise ValueError("An unexpected error happened : please read the error message")
             except Exception as e:
-                print(f"error catch {e}")
                 raise Exception("An unexpected error happened : please read the error message")
             else:
                 retry = False
@@ -68,18 +67,23 @@ def summary(type, value, subtype=None):
             return None
     return query_dict
 
+
 def summary_genes(values):
     values = values.split()
     count = 0
     repeat = True
-    result_dict = {"genes":list()}
+    result_dict = {"genes": list()}
     while count < len(values):
         to_request = " ".join(values[count:count+15])
         print(to_request)
-        middle_dict = summary("gene", to_request, "gene-id")
+        try:
+            middle_dict = summary("gene", to_request, "gene-id")
+        except ValueError:
+            middle_dict = {"genes": list()}
         result_dict["genes"].extend(middle_dict["genes"])
         count += 15
     return result_dict
+
 
 def get_genome(taxid):
     """
