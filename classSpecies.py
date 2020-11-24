@@ -27,7 +27,7 @@ class species:
             json.dump(self.genes, file_genes)
         info_species = self.taxid + "_infos_species.txt"
         with open(info_species, "w") as file_infos:
-            file_infos.write(self.species)
+            file_infos.write(self.species + "\n")
             file_infos.write("; ".join(self.lineage))
         compressed = path + self.taxid + ".zip"
         with zipfile.ZipFile(compressed, "w") as file_archive:
