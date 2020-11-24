@@ -99,4 +99,4 @@ for species in species_dict:
 for species in species_dict:
     if not os.path.isdir("species"):
         os.mkdir("species")
-    species.export_species("species/")
+    species_dict[species].export_species("species/")
