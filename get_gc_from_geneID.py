@@ -2,9 +2,10 @@ import csv
 import src.metric as metric
 import sys
 import classSpecies
+import src.ncbi as ncbi
+import os.path
 
-
-def fname(set_humain, species_dic, gffFile, fastaFile):
+def get_metric(species_dic, gffFile, fastaFile):
     """
     """
     listResult = []
@@ -20,12 +21,14 @@ def fname(set_humain, species_dic, gffFile, fastaFile):
         listResult.append((taxid, i[2], valeurGC))
     return listResult
 
-
+'''
 csvfile = open(sys.argv[1]) # CSV containing "taxid" "human_gene" "ortholog"
 csv_reader = csv.DictReader(csvfile)
+'''
 
-pathToFasta = sys.argv[2]
-pathToGFF = sys.argv[3]
+csvfile = open('test.csv') # CSV containing "taxid" "human_gene" "ortholog"
+csv_reader = csv.DictReader(csvfile)
+
 
 human_gene_set = set() # set of humans genes
 species_dic = dict() # dic of object species
@@ -36,3 +39,25 @@ for row in csv_reader:
         species_dic[row["taxid"]] = classSpecies.species(row["taxid"])
     species_dic[row["taxid"]].add_gene(row["human_gene"], row["geneID"]) # uses the add_gene function to add the current ortholog to the species object
 
+
+
+for taxid, classSpecies in species_dic.items():
+   #extracted_file_list=ncbi.get_genome(taxid)
+   pathToFasta="/tmp/genome/GCF_000151885.1.fna"
+   pathToGFF="/tmp/genome/GCF_000151885.1.gff"
+   genIDlist=dict()
+   for humanid,genID in classSpecies.get_genes().items():
+       genIDlist[genID[0]]=humanid
+   dict_genes=metric.parsingGFF(genIDlist,pathToGFF)
+   dict_genes=metric.parsing_fasta(dict_genes,pathToFasta)
+   for i in dict_genes.values():
+       metric.taux_GC(i)
+   if not os.path.isfile('metrics_GC_gene.txt'):
+       metric.create_tab_metrics(dict_genes,'GC_gene')
+   metric.write_tab_metrics(dict_genes,'GC_gene',taxid)
+   if not os.path.isfile('metrics_GC_exons.txt'):
+       metric.create_tab_metrics(dict_genes,'GC_exons')
+   metric.write_tab_metrics(dict_genes,'GC_exons',taxid)
+   if not os.path.isfile('metrics_GC3_exons.txt'):
+       metric.create_tab_metrics(dict_genes,'GC3_exons')
+   metric.write_tab_metrics(dict_genes,'GC3_exons',taxid)

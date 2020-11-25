@@ -12,7 +12,7 @@ import json
 import zipfile
 import os
 import time
-import utilities
+import src.utilities
 
 
 PATH_DATASET = "./datasets"

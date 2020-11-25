@@ -54,6 +54,7 @@ def parsingGFF(geneIDlist, fileGFF, taxid):
                 continue
             match = re.search(regex, line)
             if match is None:
+                print("match non trouvé")
                 continue
             if int(match.group(4)) in geneID:
                 # geneID found by get_orthologs
