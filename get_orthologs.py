@@ -2,6 +2,7 @@ import json
 import subprocess
 import sys
 import csv
+import os
 
 import src.orthodb as orthodb
 import src.ncbi as ncbi
@@ -96,4 +97,6 @@ for species in species_dict:
     species.set_lineage(lineage(species.get_taxid()))
 
 for species in species_dict:
-    species.export_species("species/")
+    if not os.path.isdir("species"):
+        os.mkdir("species")
+    species_dict[species].export_species("species/")
