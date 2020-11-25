@@ -42,9 +42,9 @@ for row in csv_reader:
 
 
 for taxid, classSpecies in species_dic.items():
-   #extracted_file_list=ncbi.get_genome(taxid)
-   pathToFasta="/tmp/genome/GCF_000151885.1.fna"
-   pathToGFF="/tmp/genome/GCF_000151885.1.gff"
+   extracted_file_list=ncbi.get_genome(taxid)
+   pathToFasta= extracted_file_list[0]
+   pathToGFF= extracted_file_list[1]
    genIDlist=dict()
    for humanid,genID in classSpecies.get_genes().items():
        genIDlist[genID[0]]=humanid
