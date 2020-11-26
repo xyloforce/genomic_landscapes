@@ -29,7 +29,7 @@ for line in open(genomefile).readlines():
         if columns[2] == "gene":
             for value in re.findall("ID=gene-(\w*);Dbxref=GeneID:(\d*)", columns[8]):
                 gene_set.add(value[1]) # match 2 : geneID
-                csv_writer.writerow([value[1], value[0], columns[0][7:9]]) # geneID : symbol : chr
+                csv_writer.writerow([value[1], value[0], columns[0][7:9], columns[3]]) # geneID : symbol : chr
                 gene_count += 1
                 if gene_count % countPrint == 0:
                     print(f"extracting in progress… {gene_count} genes extracted")
