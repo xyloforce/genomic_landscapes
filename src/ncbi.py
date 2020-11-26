@@ -12,12 +12,7 @@ import json
 import zipfile
 import os
 import time
-<<<<<<< HEAD
-import src.utilities
-=======
 from . import utilities
->>>>>>> d8180b4a5d5d047d6961c85dd0eef20fb6654c7e
-
 
 PATH_DATASET = "./datasets"
 PATH_TO_DATA_DL = "/tmp/genome/"  # don’t forget / at end
@@ -162,7 +157,7 @@ def lineage(taxid):
     lineage = utilities.query_xpath(xml, ".//Lineage")
     lineage = lineage[0].text
     lineage = lineage.split("; ")
-    lineage = lineage[15:]
+    lineage = lineage[15:] # since we look at tetrapoda level we don't need the 15 items at the beginning
     return lineage
 
 
