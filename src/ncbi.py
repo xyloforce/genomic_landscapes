@@ -26,8 +26,8 @@ VERBOSE = True  # simple verbose mode, recommandation to false
 def summary(type, value, subtype=None):
     """
     Return dic from dataset command summary of NCBI.
-    By default is summary of gene ID.
 
+    By default is summary of gene ID.
     command summary of NCBI is : « datasets summary [gene/genome] [subtype] [value] »
     type is gene or genome
     subtype is optionnel and from SUBTYPE_LIST
@@ -59,7 +59,7 @@ def summary(type, value, subtype=None):
                     try_count += 1
                 else:
                     raise ValueError("An unexpected error happened : please read the error message")
-            except Exception as e:
+            except Exception:
                 raise Exception("An unexpected error happened : please read the error message")
             else:
                 retry = False
@@ -99,13 +99,12 @@ def get_genome(taxid):
     print("download started for assembly " + accession)
 
     # execute command
-    errors = ""
-    process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    #process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=errors)
+    process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if VERBOSE:
         # print download progressing
         while True:
             output = process.stdout.readline()
+            stderr = process.stdout.readline()
             if process.poll() is not None:
                 break
             if output:
@@ -113,12 +112,14 @@ def get_genome(taxid):
                 if "Download error" in output.decode('utf-8').rstrip():
                     # download failed
                     time.sleep(1)
-                    print("Errer localisé !")
-                    print(subprocess.CalledProcessError)
+                    print(stderr.decode('utf-8').rstrip())
                     os.remove("ncbi_dataset.zip")
                     sys.exit()
+            if len(stderr) > 58:
+                print("Error")
+                print(process.stdout.readline().decode('utf-8').rstrip())
     output, error = process.communicate()
-    if error is None:
+    if error is None or error == b'':
         # if ok, we unzip the genome file
         downloaded_file = zipfile.ZipFile("ncbi_dataset.zip")
         extracted_file_list = list()  # contain path to files extracted
@@ -146,12 +147,14 @@ def get_genome(taxid):
                     print(f"Error with path destination ({str(e)})")
         return extracted_file_list
     else:
-        print(f"error in command line : {error}")
+        print(f"error in command line, error is {error}")
+        sys.exit()
 
 
 def taxonomy(taxid):
     """
-    get info from corresponding database ncbi taxonomy
+    Get info from corresponding database ncbi taxonomy.
+
     return xml
     """
     base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
@@ -161,7 +164,8 @@ def taxonomy(taxid):
 
 def lineage(taxid):
     """
-    get only lineage from global taxonomy record
+    Get only lineage from global taxonomy record.
+
     """
     xml = taxonomy(taxid)
     lineage = utilities.query_xpath(xml, ".//Lineage")
