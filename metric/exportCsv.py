@@ -79,9 +79,9 @@ for taxid in allGene:
                 row += ',' + str(allGene[taxid][geneID])
             except KeyError:
                 # gene exist but we could’t calculate the value metric
-                row += ',Na'
+                row += ',NA'
         else:
-            row += ',Na'  # no value, Na for R language
+            row += ',NA'  # no value, NA for R language
     row += '\n'
     f.write(row)
 f.close()
