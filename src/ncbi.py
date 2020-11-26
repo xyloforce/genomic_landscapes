@@ -3,7 +3,7 @@
 
 ##########################################################
 # Library python for project M1 2020
-# version 0.1
+# version 0.4
 # datasets version use is 10.5
 ##########################################################
 import sys
@@ -12,13 +12,15 @@ import json
 import zipfile
 import os
 import time
-from . import utilities
+try:
+    from . import utilities
+except ImportError:
+    import utilities
 
 PATH_DATASET = "./datasets"
 PATH_TO_DATA_DL = "/tmp/genome/"  # don’t forget / at end
 SUBTYPE_LIST = ["accession", "taxon", "gene-id", "symbol"]  # from NCBI documentation
 VERBOSE = True  # simple verbose mode, recommandation to false
-# TODO: dataset path
 
 
 def summary(type, value, subtype=None):
@@ -70,7 +72,6 @@ def summary(type, value, subtype=None):
 def summary_genes(values):
     values = values.split()
     count = 0
-    repeat = True
     result_dict = {"genes": list()}
     while count < len(values):
         to_request = " ".join(values[count:count+15])
@@ -98,7 +99,9 @@ def get_genome(taxid):
     print("download started for assembly " + accession)
 
     # execute command
+    errors = ""
     process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    #process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=errors)
     if VERBOSE:
         # print download progressing
         while True:
@@ -107,6 +110,13 @@ def get_genome(taxid):
                 break
             if output:
                 print(output.decode('utf-8').rstrip())
+                if "Download error" in output.decode('utf-8').rstrip():
+                    # download failed
+                    time.sleep(1)
+                    print("Errer localisé !")
+                    print(subprocess.CalledProcessError)
+                    os.remove("ncbi_dataset.zip")
+                    sys.exit()
     output, error = process.communicate()
     if error is None:
         # if ok, we unzip the genome file
@@ -124,7 +134,7 @@ def get_genome(taxid):
                     print(f"[Warning] {PATH_TO_DATA_DL + archive_file} destination is a file and will rewrite")
                 try:
                     # downloaded_file.extract(archive_file, path=PATH_TO_DATA_DL)
-                    #extracted_file_list.append(PATH_TO_DATA_DL + archive_file)
+                    # extracted_file_list.append(PATH_TO_DATA_DL + archive_file)
                     extension = file_to_extract.split(".")[-1]
                     pathFile = PATH_TO_DATA_DL + accession + '.' + extension
                     with open(pathFile, 'wb') as f:
@@ -157,7 +167,7 @@ def lineage(taxid):
     lineage = utilities.query_xpath(xml, ".//Lineage")
     lineage = lineage[0].text
     lineage = lineage.split("; ")
-    lineage = lineage[15:] # since we look at tetrapoda level we don't need the 15 items at the beginning
+    lineage = lineage[15:]  # since we look at tetrapoda level we don't need the 15 items at the beginning
     return lineage
 
 
