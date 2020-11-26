@@ -19,7 +19,7 @@ DF$"1"[3] = NA
 DF2 <- data.matrix(DF)
 
 # heatmap
-myColor <- colorRampPalette(c("white", "purple4")) # low to hight
+myColor <- colorRampPalette(c("white", "purple4")) # low to high
 
 heatmap(DF2, col=myColor(n = 1000))
 
