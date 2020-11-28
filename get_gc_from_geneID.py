@@ -5,29 +5,10 @@ import classSpecies
 import src.ncbi as ncbi
 import os.path
 
-def get_metric(species_dic, gffFile, fastaFile):
-    """
-    """
-    listResult = []
-    for taxid in species_dic:
-        dicGene = metric.get_info_gene(species_dic[taxid], gffFile)
-        sequence_genes_species = cut_fasta_gene(dicGene, fastaFile)
-
-    for i in sequence_genes_species.values():
-        if species_dic[i[2]] in species_dic:
-            valeurGC = str(metric.calcul_GC(i[0]))
-        else:
-            valeurGC = "NA"
-        listResult.append((taxid, i[2], valeurGC))
-    return listResult
-
-'''
 csvfile = open(sys.argv[1]) # CSV containing "taxid" "human_gene" "ortholog"
 csv_reader = csv.DictReader(csvfile)
-'''
 
-csvfile = open('test.csv') # CSV containing "taxid" "human_gene" "ortholog"
-csv_reader = csv.DictReader(csvfile)
+
 
 
 human_gene_set = set() # set of humans genes
@@ -50,6 +31,7 @@ for taxid, classSpecies in species_dic.items():
        genIDlist[genID[0]]=humanid
    dict_genes=metric.parsingGFF(genIDlist,pathToGFF)
    dict_genes=metric.parsing_fasta(dict_genes,pathToFasta)
+   metric.get_intron_size(dict_genes)
    for i in dict_genes.values():
        metric.taux_GC(i)
    if not os.path.isfile('metrics_GC_gene.txt'):
@@ -61,3 +43,22 @@ for taxid, classSpecies in species_dic.items():
    if not os.path.isfile('metrics_GC3_exons.txt'):
        metric.create_tab_metrics(dict_genes,'GC3_exons')
    metric.write_tab_metrics(dict_genes,'GC3_exons',taxid)
+   if not os.path.isfile('metrics_taille_intron.txt'):
+       metric.create_tab_metrics(dict_genes,'taille_intron')
+   metric.write_tab_metrics(dict_genes,'taille_intron',taxid) 
+   if not os.path.isfile('metrics_taux_GC_flanquante_avant.txt'):
+       metric.create_tab_metrics(dict_genes,'taux_GC_flanquante_avant')
+   metric.write_tab_metrics(dict_genes,'taux_GC_flanquante_avant',taxid)     
+   if not os.path.isfile('metrics_taux_GC_flanquante_apres.txt'):
+       metric.create_tab_metrics(dict_genes,'taux_GC_flanquante_apres')
+   metric.write_tab_metrics(dict_genes,'taux_GC_flanquante_apres',taxid)   
+      
+   
+   
+   
+
+
+
+
+
+
