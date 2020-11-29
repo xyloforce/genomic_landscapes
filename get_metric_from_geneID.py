@@ -23,6 +23,8 @@ for row in csv_reader:
         species_dic[row["taxid"]] = classSpecies.species(row["taxid"])
     species_dic[row["taxid"]].add_gene(row["human_gene"], row["geneID"]) # uses the add_gene function to add the current ortholog to the species object
 
+print(human_gene_set)
+print(len(human_gene_set))
 
 #on parcours espèce par espèce
 for taxid, classSpecies in species_dic.items():
@@ -44,29 +46,28 @@ for taxid, classSpecies in species_dic.items():
    #calcul des taux de GC
    for i in dict_genes.values():
        metric.taux_GC(i)
-       print(i.taux_GC_gene)
    
    #obtention de la taille des introns
    metric.get_intron_size(dict_genes)
    
    #création des différents fichiers de métrique (un par métrique)
    if not os.path.isfile('metrics_GC_gene.txt'):
-       metric.create_tab_metrics(dict_genes,'GC_gene')
+       metric.create_tab_metrics(human_gene_set,'GC_gene')
    metric.write_tab_metrics(dict_genes,'GC_gene',taxid)
    if not os.path.isfile('metrics_GC_exons.txt'):
-       metric.create_tab_metrics(dict_genes,'GC_exons')
+       metric.create_tab_metrics(human_gene_set,'GC_exons')
    metric.write_tab_metrics(dict_genes,'GC_exons',taxid)
    if not os.path.isfile('metrics_GC3_exons.txt'):
-       metric.create_tab_metrics(dict_genes,'GC3_exons')
+       metric.create_tab_metrics(human_gene_set,'GC3_exons')
    metric.write_tab_metrics(dict_genes,'GC3_exons',taxid)
    if not os.path.isfile('metrics_taille_intron.txt'):
-       metric.create_tab_metrics(dict_genes,'taille_intron')
+       metric.create_tab_metrics(human_gene_set,'taille_intron')
    metric.write_tab_metrics(dict_genes,'taille_intron',taxid) 
    if not os.path.isfile('metrics_taux_GC_flanquante_avant.txt'):
-       metric.create_tab_metrics(dict_genes,'taux_GC_flanquante_avant')
+       metric.create_tab_metrics(human_gene_set,'taux_GC_flanquante_avant')
    metric.write_tab_metrics(dict_genes,'taux_GC_flanquante_avant',taxid)     
    if not os.path.isfile('metrics_taux_GC_flanquante_apres.txt'):
-       metric.create_tab_metrics(dict_genes,'taux_GC_flanquante_apres')
+       metric.create_tab_metrics(human_gene_set,'taux_GC_flanquante_apres')
    metric.write_tab_metrics(dict_genes,'taux_GC_flanquante_apres',taxid)   
       
    

@@ -207,11 +207,11 @@ def taux_GC(objet):
     objet.taux_GC_flanquante_apres=calcul_GC(list_seq_flanquante_apres,0)
 
 
-def create_tab_metrics(dico_metric,metrics):
+def create_tab_metrics(set_human_gene,metrics):
     file_metric = open('metrics_{}.txt'.format(metrics),'w')
     file_metric.write("genome reference"+"\t")
-    for cle in dico_metric.keys():
-        file_metric.write(cle+"\t")
+    for humanID in set_human_gene:
+        file_metric.write(str(humanID)+"\t")
     file_metric.write("\n")
     file_metric.close
 
@@ -224,24 +224,43 @@ def write_tab_metrics(dico_metric,metrics,taxID):
     id_human=read_metric.readline()
     read_metric.close()
     id_human=id_human.split('\t')
+    del id_human[-1]
+    print(id_human)
+    print(len(id_human))
     file_metric_2 = open('metrics_{}.txt'.format(metrics),'a')
     file_metric_2.write(taxID+"\t")
-    for human_id in id_human:
+    for index,human_id in enumerate(id_human):
+        if index==0:
+            continue
+        aucune_ecriture=True
         for cle,valeur in dico_metric.items():
             if cle==human_id:
                 if metrics=='GC_gene':
                     file_metric_2.write(str(valeur.taux_GC_gene)+"\t")
+                    aucune_ecriture=False
+                    continue
                 if metrics=='GC_exons':
                     file_metric_2.write(str(valeur.taux_GC_exon)+"\t")
+                    aucune_ecriture=False
+                    continue
                 if metrics=='GC3_exons':
                     file_metric_2.write(str(valeur.taux_GC3_exon)+"\t")
+                    aucune_ecriture=False
+                    continue
                 if metrics=='taille_intron':
                      file_metric_2.write(str(valeur.taille_intron)+"\t")
+                     aucune_ecriture=False
+                     continue
                 if metrics=='taux_GC_flanquante_avant':
                     file_metric_2.write(str(valeur.taux_GC_flanquante_avant)+"\t")
+                    aucune_ecriture=False
+                    continue
                 if metrics=='taux_GC_flanquante_apres':
                     file_metric_2.write(str(valeur.taux_GC_flanquante_apres)+"\t")
-                
-                                                       
+                    aucune_ecriture=False
+                    continue
+        if aucune_ecriture==True:
+            file_metric_2.write("NA"+"\t")
+            test=False                         
     file_metric_2.write("\n")
     file_metric_2.close()
