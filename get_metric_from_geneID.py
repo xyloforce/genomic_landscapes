@@ -23,9 +23,6 @@ for row in csv_reader:
         species_dic[row["taxid"]] = classSpecies.species(row["taxid"])
     species_dic[row["taxid"]].add_gene(row["human_gene"], row["geneID"]) # uses the add_gene function to add the current ortholog to the species object
 
-print(human_gene_set)
-print(len(human_gene_set))
-
 #on parcours espèce par espèce
 for taxid, classSpecies in species_dic.items():
    #récupération des génomes sous forme de fasta et de gff

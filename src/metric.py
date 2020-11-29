@@ -225,8 +225,6 @@ def write_tab_metrics(dico_metric,metrics,taxID):
     read_metric.close()
     id_human=id_human.split('\t')
     del id_human[-1]
-    print(id_human)
-    print(len(id_human))
     file_metric_2 = open('metrics_{}.txt'.format(metrics),'a')
     file_metric_2.write(taxID+"\t")
     for index,human_id in enumerate(id_human):
