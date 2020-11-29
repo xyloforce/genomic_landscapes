@@ -241,6 +241,7 @@ def write_tab_metrics(dico_metric,metrics,taxID):
                     file_metric_2.write(str(valeur.taux_GC_flanquante_avant)+"\t")
                 if metrics=='taux_GC_flanquante_apres':
                     file_metric_2.write(str(valeur.taux_GC_flanquante_apres)+"\t")
+                
                                                        
     file_metric_2.write("\n")
     file_metric_2.close()
