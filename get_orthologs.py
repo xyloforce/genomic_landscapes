@@ -82,21 +82,50 @@ else:
     with open('ncbi_gene_ids.json') as json_file:
         ncbi_gene_ids = json.load(json_file)
 
-species_dict = dict()
+species = dict() # dict of species_name:row_to_write, avoid duplicating taxo info, can't write row immediately because we need to harmonize taxo length first
+max_len = 0 # len of the max lineage
+
+h_csv_results = open("species_taxid_geneID.csv", "w")
+h_csv_taxo = open("taxo_reference.csv", "w")
+
+results_writer = csv.writer(h_csv_results)
+taxo_writer = csv.writer(h_csv_taxo)
 
 for gene in ncbi_gene_ids:
+    print("Querying gene " + list(ncbi_gene_ids.keys()).index(gene) + "/" + len(ncbi_gene_ids.keys()))
     query_dict = ncbi.summary_genes(' '.join(ncbi_gene_ids[gene]))
     for ortholog in query_dict["genes"]:
         taxid = ortholog["gene"]["tax_id"]
-        if taxid not in species_dict:
+        results_writer.writerow([ortholog["gene"]["taxname"], taxid, gene])
+        if taxid not in species:
             lineage = ncbi.lineage(taxid)
-            species_dict[taxid] = classSpecies.species(taxid, ortholog["gene"]["taxname"], lineage)
-        species_dict[taxid].add_gene(gene, ortholog["gene"]["gene_id"])
+            list_infos = [ortholog["gene"]["taxname"], taxid]
+            list_infos += lineage
+            if len(list_infos > max_len):
+                max_len = len(list_infos)
+            species[taxid] = list_infos
 
-for species in species_dict:
-    species.set_lineage(lineage(species.get_taxid()))
+for taxid in species:
+    while len(species[taxid]) < max_length: # add empty columns until its OK
+        species[taxid].append("")
+    csv_taxonomy_writer.writerow(species[taxid]) # then write row
 
-for species in species_dict:
-    if not os.path.isdir("species"):
-        os.mkdir("species")
-    species_dict[species].export_species("species/")
+## OLD : species object
+# species_dict = dict()
+
+# for gene in ncbi_gene_ids:
+#     query_dict = ncbi.summary_genes(' '.join(ncbi_gene_ids[gene]))
+#     for ortholog in query_dict["genes"]:
+#         taxid = ortholog["gene"]["tax_id"]
+#         if taxid not in species_dict:
+#             lineage = ncbi.lineage(taxid)
+#             species_dict[taxid] = classSpecies.species(taxid, ortholog["gene"]["taxname"], lineage)
+#         species_dict[taxid].add_gene(gene, ortholog["gene"]["gene_id"])
+
+# for species in species_dict:
+#     species.set_lineage(lineage(species.get_taxid()))
+
+# for species in species_dict:
+#     if not os.path.isdir("species"):
+#         os.mkdir("species")
+#     species_dict[species].export_species("species/")
