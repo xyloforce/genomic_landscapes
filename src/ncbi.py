@@ -18,7 +18,6 @@ except ImportError:
     import utilities
 
 PATH_DATASET = "./datasets"
-PATH_TO_DATA_DL = "/tmp/genome/"  # don’t forget / at end
 SUBTYPE_LIST = ["accession", "taxon", "gene-id", "symbol"]  # from NCBI documentation
 VERBOSE = True  # simple verbose mode, recommandation to false
 
@@ -123,21 +122,23 @@ def get_genome(taxid):
         # if ok, we unzip the genome file
         downloaded_file = zipfile.ZipFile("ncbi_dataset.zip")
         extracted_file_list = list()  # contain path to files extracted
+        extract_dir = "./" + accession + "/"  # don’t forget / at end
         for archive_file in downloaded_file.namelist():
             # get gff and fna files
             if archive_file.endswith((".gff", ".fna")):
                 file_to_extract = archive_file.split('/')[-1]
                 # checking path conditions
-                if not os.path.exists(PATH_TO_DATA_DL):
-                    print(f"[Info] {PATH_TO_DATA_DL} not existed, so will create")
-                    os.mkdir(PATH_TO_DATA_DL)
-                if os.path.isfile(PATH_TO_DATA_DL + archive_file):
-                    print(f"[Warning] {PATH_TO_DATA_DL + archive_file} destination is a file and will rewrite")
+                if not os.path.exists(extract_dir):
+                    print(f"[Info] {extract_dir} not existed, so will create")
+                    os.mkdir(extract_dir)
+                if os.path.isfile(extract_dir + archive_file):
+                    print(f"[Warning] {extract_dir + archive_file} destination is a file and will rewrite")
                 try:
-                    # downloaded_file.extract(archive_file, path=PATH_TO_DATA_DL)
-                    # extracted_file_list.append(PATH_TO_DATA_DL + archive_file)
+                    # downloaded_file.extract(archive_file, path=extract_dir)
+                    # extracted_file_list.append(extract_dir + archive_file)
                     extension = file_to_extract.split(".")[-1]
-                    pathFile = PATH_TO_DATA_DL + accession + '.' + extension
+                    # pathFile = extract_dir + accession + '.' + extension
+                    pathFile = extract_dir + file_to_extract
                     with open(pathFile, 'wb') as f:
                         f.write(downloaded_file.read(archive_file))
                         extracted_file_list.append(pathFile)
@@ -145,6 +146,7 @@ def get_genome(taxid):
                 except NotADirectoryError as e:
                     # print(f"Error with path destination ({str(e).split()[-1]})")
                     print(f"Error with path destination ({str(e)})")
+        os.remove("ncbi_dataset.zip")
         return extracted_file_list
     else:
         print(f"error in command line, error is {error}")
