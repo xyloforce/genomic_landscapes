@@ -55,4 +55,14 @@ def get_xml(baseURL, payload):
 def query_xpath(xml, xpath):
     return xml.findall(xpath)
 
-
+def fuse_fasta(fasta_list, merged = "merged.fasta"):
+    print("file will be created : " + merged)
+    merged_file = open(merged, "w")
+    for fasta_filename in fasta_list:
+        if fasta_filename.endswith(".fna"):
+            fasta_file = open(fasta_filename)
+            for line in fasta_file:
+                merged_file.write(line)
+            fasta_file.close()
+            os.remove(fasta_filename)
+    return merged
