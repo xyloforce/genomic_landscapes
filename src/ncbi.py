@@ -176,6 +176,23 @@ def lineage(taxid):
     lineage = lineage[15:]  # since we look at tetrapoda level we don't need the 15 items at the beginning
     return lineage
 
+def get_genome_alt(taxid):
+    query_dict = summary("genome", str(taxid), subtype="taxon")
+    # get assembly_accession code of taxid from query_dict
+    # TODO: prendre le référence sinon faudra choisir…
+    accession = query_dict["assemblies"][0]["assembly"]["assembly_accession"]
+
+    base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
+    xml = utilities.get_xml(base_url, {"db": "nuccore", "term": accession, "retmax":"200"})
+
+    base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+    for id_sequence in utilities.query_xpath(xml, ".//IdList/Id"):
+        fasta = utilities.get_request(base_url, {"db": "nuccore", "id": id_sequence.text, "rettype":"fasta"})
+        fasta_filename = "test/" + id_sequence.text + "." + str(taxid) + ".fasta"
+        fasta_file = open(fasta_filename, "w")
+        fasta_file.write(fasta.text)
+        fasta_file.close()
+    return True
 
 #  test if datasets is installed
 try:

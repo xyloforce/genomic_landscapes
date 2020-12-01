@@ -39,7 +39,7 @@ def get_data(baseURL, payload):
     return data
 
 
-def get_xml(baseURL, payload):
+def get_xml(baseURL, payload={}):
     retry = True
     while retry:  # RETRY UNTIL SUCCES U SONOFAGUN
         try:
