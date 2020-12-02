@@ -12,6 +12,10 @@ import json
 import zipfile
 import os
 import time
+import ftplib
+import gzip
+import re
+
 try:
     from . import utilities
 except ImportError:
@@ -160,7 +164,7 @@ def taxonomy(taxid):
     return xml
     """
     base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
-    xml = utilities.get_xml(base_url, {"db": "taxonomy", "id": taxid, "rettype": "xml", "retmode": "text"})
+    xml = utilities.get_xml(base_url, {"db": "taxonomy", "id": taxid, "rettype": "xml", "retmode": "text", "api_key":"5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
     return xml
 
 
@@ -176,23 +180,67 @@ def lineage(taxid):
     lineage = lineage[15:]  # since we look at tetrapoda level we don't need the 15 items at the beginning
     return lineage
 
-def get_genome_alt(taxid):
-    query_dict = summary("genome", str(taxid), subtype="taxon")
+def get_genome_alt(species_name):
+    #query_dict = summary("genome", str(taxid), subtype="taxon")
+    filelist = list()
+
     # get assembly_accession code of taxid from query_dict
-    # TODO: prendre le référence sinon faudra choisir…
-    accession = query_dict["assemblies"][0]["assembly"]["assembly_accession"]
+    # accession = query_dict["assemblies"][0]["assembly"]["assembly_accession"]
 
-    base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
-    xml = utilities.get_xml(base_url, {"db": "nuccore", "term": accession, "retmax":"200"})
+    # define the two essential URLs
+    esearch = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
+    efetch = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 
-    base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
-    for id_sequence in utilities.query_xpath(xml, ".//IdList/Id"):
-        fasta = utilities.get_request(base_url, {"db": "nuccore", "id": id_sequence.text, "rettype":"fasta"})
-        fasta_filename = "test/" + id_sequence.text + "." + str(taxid) + ".fasta"
-        fasta_file = open(fasta_filename, "w")
-        fasta_file.write(fasta.text)
-        fasta_file.close()
-    return True
+    # get genome accession for species
+    xml = utilities.get_xml(esearch, {"db": "genome", "term": species_name, "retmax":"200", "api_key":"5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
+    results = utilities.query_xpath(xml, ".//IdList/Id")
+
+    if len(results) == 0:
+        raise ValueError("No results found for " + species_name)
+    elif not len(results) == 1:
+        print("Warning : more than one result. Will pick the first, but you may check on ncbi that it was correct. Species name was " + species_name + "and we got " + str(len(results)) + " results")
+
+    xml = utilities.get_xml(efetch, {"db": "genome", "id": results[0].text, "rettype":"docsum", "api_key":"5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
+    results = utilities.query_xpath(xml, './/Item[@Name="Assembly_Accession"]')
+    accession = results[0].text
+
+    print(accession)
+
+    # get ftp URL for accession
+    xml = utilities.get_xml(esearch, {"db": "assembly", "term": accession, "retmax":"200", "api_key":"5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
+    results = utilities.query_xpath(xml, ".//IdList/Id")
+    if len(results) == 0:
+        raise ValueError("No results found for " + species_name)
+    elif not len(results) == 1:
+        print("Warning : more than one result. Will pick the first, but you may check on ncbi that it was correct. Accession was " + accession + "and we got " + str(len(results)) + " results")
+
+    xml = utilities.get_xml(efetch, {"db": "assembly", "id": results[0].text, "rettype":"docsum", "api_key":"5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
+    results = utilities.query_xpath(xml, './/FtpPath_GenBank')
+
+    filelist = get_files_from_ftp(results[0].text)
+    extracted = list()
+
+    for filename in filelist:
+        regex = accession + "_[A-Za-z1-9\.]+_genomic\.fna\.gz"
+        if re.search(regex, filename) != None or filename.endswith(".gff.gz"): # only one element in theory
+            request = utilities.get_request("https://" + "/".join(results[0].text.split("/")[2:]) + "/" + filename)
+            filename_uncompressed = ".".join(filename.split(".")[:-1])
+            uncompressed_handler = open(filename_uncompressed, "wb")
+            uncompressed_handler.write(gzip.decompress(request.content))
+            uncompressed_handler.close()
+            extracted.append(filename_uncompressed)
+
+    return extracted
+
+
+def get_files_from_ftp(url_fasta):
+    url_ftp = url_fasta.split("/")[2]
+    ftp = ftplib.FTP(url_ftp)
+    ftp.login()
+    ftp.cwd("/".join(url_fasta.split("/")[3:]))
+    filelist = ftp.nlst()
+    return filelist
+
 
 #  test if datasets is installed
 try:

@@ -8,7 +8,7 @@ import os
 # some functions who can't go anywhere else
 
 
-def get_request(baseURL, payload):
+def get_request(baseURL, payload= {}):
     """
     function to make a correct request
     """
@@ -26,7 +26,7 @@ def get_request(baseURL, payload):
     return request
 
 
-def get_data(baseURL, payload):
+def get_data(baseURL, payload={}):
     retry = True
     while retry:  # RETRY UNTIL SUCCES U SONOFAGUN
         try:
@@ -66,3 +66,4 @@ def fuse_fasta(fasta_list, merged = "merged.fasta"):
             fasta_file.close()
             os.remove(fasta_filename)
     return merged
+
