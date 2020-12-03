@@ -3,14 +3,10 @@
 
 ##########################################################
 # Library python for project M1 2020
-# version 0.4
+# version 0.6
 # datasets version use is 10.5
 ##########################################################
 import sys
-import subprocess
-import json
-import os
-import time
 import ftplib
 import gzip
 import re
@@ -23,6 +19,9 @@ except ImportError:
 PATH_DATASET = "./datasets"
 SUBTYPE_LIST = ["accession", "taxon", "gene-id", "symbol"]  # from NCBI documentation
 VERBOSE = True  # simple verbose mode, recommandation to false
+
+esearch = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
+efetch = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 
 
 def summary_genes(values):
@@ -43,7 +42,7 @@ def taxonomy(taxid):
     return xml
     """
     base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
-    xml = utilities.get_xml(base_url, {"db": "taxonomy", "id": taxid, "rettype": "xml", "retmode": "text", "api_key":"5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
+    xml = utilities.get_xml(base_url, {"db": "taxonomy", "id": taxid, "rettype": "xml", "retmode": "text", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
     return xml
 
 
@@ -60,14 +59,14 @@ def lineage(taxid):
     return lineage
 
 
-def get_summary(geneIDs, lineage = False):
+def get_summary(geneIDs, lineage=False):
     efetch = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
     result_dic = dict()
 
-    xml = utilities.get_xml(efetch, {"db": "gene", "id": ",".join(geneIDs), "retmode":"xml", "api_key":"5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
+    xml = utilities.get_xml(efetch, {"db": "gene", "id": ",".join(geneIDs), "retmode": "xml", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
     elements = utilities.query_xpath(xml, "./")
     for geneID, element in zip(geneIDs, elements):
-        if utilities.query_xpath(element, ".//Gene-track_geneid") != []: # if it's not an empty match
+        if utilities.query_xpath(element, ".//Gene-track_geneid") != []:  # if it's not an empty match
             species_name = utilities.query_xpath(element, ".//Org-ref_taxname")[0].text
             taxid = utilities.query_xpath(element, ".//Org-ref_db/Dbtag/Dbtag_tag/Object-id/Object-id_id")[0].text
             if lineage:
@@ -79,18 +78,14 @@ def get_summary(geneIDs, lineage = False):
 
 
 def get_genome(species_name):
-    #query_dict = summary("genome", str(taxid), subtype="taxon")
+    # query_dict = summary("genome", str(taxid), subtype="taxon")
     filelist = list()
 
     # get assembly_accession code of taxid from query_dict
     # accession = query_dict["assemblies"][0]["assembly"]["assembly_accession"]
 
-    # define the two essential URLs
-    esearch = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
-    efetch = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
-
     # get genome accession for species
-    xml = utilities.get_xml(esearch, {"db": "genome", "term": species_name, "retmax":"200", "api_key":"5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
+    xml = utilities.get_xml(esearch, {"db": "genome", "term": species_name, "retmax": "200", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
     results = utilities.query_xpath(xml, ".//IdList/Id")
 
     if len(results) == 0:
@@ -98,21 +93,21 @@ def get_genome(species_name):
     elif not len(results) == 1:
         print("Warning : more than one result. Will pick the first, but you may check on ncbi that it was correct. Species name was " + species_name + "and we got " + str(len(results)) + " results")
 
-    xml = utilities.get_xml(efetch, {"db": "genome", "id": results[0].text, "rettype":"docsum", "api_key":"5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
+    xml = utilities.get_xml(efetch, {"db": "genome", "id": results[0].text, "rettype": "docsum", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
     results = utilities.query_xpath(xml, './/Item[@Name="Assembly_Accession"]')
     accession = results[0].text
 
     print(accession)
 
     # get ftp URL for accession
-    xml = utilities.get_xml(esearch, {"db": "assembly", "term": accession, "retmax":"200", "api_key":"5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
+    xml = utilities.get_xml(esearch, {"db": "assembly", "term": accession, "retmax": "200", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
     results = utilities.query_xpath(xml, ".//IdList/Id")
     if len(results) == 0:
         raise ValueError("No results found for " + species_name)
     elif not len(results) == 1:
         print("Warning : more than one result. Will pick the first, but you may check on ncbi that it was correct. Accession was " + accession + " and we got " + str(len(results)) + " results")
 
-    xml = utilities.get_xml(efetch, {"db": "assembly", "id": results[0].text, "rettype":"docsum", "api_key":"5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
+    xml = utilities.get_xml(efetch, {"db": "assembly", "id": results[0].text, "rettype": "docsum", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
     results = utilities.query_xpath(xml, './/FtpPath_GenBank')
 
     filelist = get_files_from_ftp(results[0].text)
@@ -120,7 +115,7 @@ def get_genome(species_name):
 
     for filename in filelist:
         regex = accession + "_[A-Za-z1-9\.]+_genomic\.fna\.gz"
-        if re.search(regex, filename) != None or filename.endswith(".gff.gz"): # only one element in theory
+        if re.search(regex, filename) is not None or filename.endswith(".gff.gz"):  # only one element in theory
             request = utilities.get_request("https://" + "/".join(results[0].text.split("/")[2:]) + "/" + filename)
             filename_uncompressed = ".".join(filename.split(".")[:-1])
             uncompressed_handler = open(filename_uncompressed, "wb")
@@ -149,7 +144,7 @@ if __name__ == '__main__':
     if sys.argv[1] == "get":
         print(get_summary(sys.argv[2]))
     elif sys.argv[1] == "exe":
-        files = get_genome_alt(sys.argv[2])  # test possible with 920835 or 2697049
+        files = get_genome(sys.argv[2])  # test possible with 920835 or 2697049
         print(f"your files are in {files}")
     else:
         print("First argument unvailable, please choice between get or exe")
