@@ -36,15 +36,4 @@ Les sorties se trouvent par défaut dans le répertoire `/tmp/genome`. Cette des
 
 ### Calcul des métriques
 
-Les scripts de calculs sont dans le dossier `metric`.
-
-#### Taille des introns
-
-C’est le script `intronSize.py` qui s’en occupe et le script `exportCsv.py` se charge de la concaténation des résultats dans un csv nommé `alexandria.csv` en hommage à la grande bibliothèque d’Alexandrie.
-
-```shell
-python metric/intronSize.py [results.csv] [taxid number] [genomic.gff]
-python metric/exportCsv.py
-```
-
-Les sorties se trouvent dans `metric/data` pour `intronSize.py` et le fichier `alexendria.csv` est le csv importable dans R pour la génération de la heatmap.
+TODO : Écrire la doc
