@@ -96,7 +96,7 @@ for gene in ncbi_gene_ids:
     query_dict = ncbi.summary_genes(' '.join(ncbi_gene_ids[gene]))
     for ortholog in query_dict:
         species_name = query_dict[ortholog][0]
-        taxid = query_dict[ortholog][0]
+        taxid = query_dict[ortholog][1]
         results_writer.writerow([species_name, taxid, gene])
         if taxid not in species:
             lineage = ncbi.lineage(taxid)
