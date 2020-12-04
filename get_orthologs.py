@@ -102,7 +102,7 @@ for gene in ncbi_gene_ids:
             lineage = ncbi.lineage(taxid)
             list_infos = [species_name, taxid]
             list_infos += lineage
-            if len(list_infos > max_len):
+            if len(list_infos) > max_len:
                 max_len = len(list_infos)
             species[taxid] = list_infos
 
