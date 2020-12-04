@@ -108,14 +108,14 @@ def get_genome(species_name):
         print("Warning : more than one result. Will pick the first, but you may check on ncbi that it was correct. Accession was " + accession + " and we got " + str(len(results)) + " results")
 
     xml = utilities.get_xml(efetch, {"db": "assembly", "id": results[0].text, "rettype": "docsum", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
-    results = utilities.query_xpath(xml, './/FtpPath_GenBank')
+    results = utilities.query_xpath(xml, './/FtpPath_RefSeq')
 
     filelist = get_files_from_ftp(results[0].text)
+    print(filelist)
     extracted = list()
 
     for filename in filelist:
-        regex = accession + "_[A-Za-z1-9\.]+_genomic\.fna\.gz"
-        if re.search(regex, filename) is not None or filename.endswith(".gff.gz"):  # only one element in theory
+        if re.search("GCF_\d+.\d+_[A-Za-z.0-9]+_genomic\.fna\.gz", filename) is not None or filename.endswith(".gff.gz"):  # only one element in theory
             request = utilities.get_request("https://" + "/".join(results[0].text.split("/")[2:]) + "/" + filename)
             filename_uncompressed = ".".join(filename.split(".")[:-1])
             uncompressed_handler = open(filename_uncompressed, "wb")
