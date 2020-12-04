@@ -92,7 +92,7 @@ results_writer = csv.writer(h_csv_results)
 taxo_writer = csv.writer(h_csv_taxo)
 
 for gene in ncbi_gene_ids:
-    print("Querying gene " + list(ncbi_gene_ids.keys()).index(gene) + "/" + len(ncbi_gene_ids.keys()))
+    print("Querying gene " + str(list(ncbi_gene_ids.keys()).index(gene)) + "/" + str(len(ncbi_gene_ids.keys())))
     query_dict = ncbi.summary_genes(' '.join(ncbi_gene_ids[gene]))
     for ortholog in query_dict:
         species_name = query_dict[ortholog][0]
@@ -100,7 +100,7 @@ for gene in ncbi_gene_ids:
         results_writer.writerow([species_name, taxid, gene])
         if taxid not in species:
             lineage = ncbi.lineage(taxid)
-            list_infos = [ortholog["gene"]["taxname"], taxid]
+            list_infos = [species_name, taxid]
             list_infos += lineage
             if len(list_infos > max_len):
                 max_len = len(list_infos)

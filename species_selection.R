@@ -23,5 +23,5 @@ genes_valides=species_gene_humanortho[species_gene_humanortho$species %in% selec
 genes_valides$concat=paste(genes_valides$human_gene, genes_valides$taxid) # create an ID to filter
 genes_uniques= genes_valides %>% group_by(concat) %>% sample_n(1) # keep a sample of size one for each ID created before
 
-final_output=genes_uniques[,c("taxid", "human_gene", "geneID")]
+final_output=genes_uniques[,c("species", "taxid", "human_gene", "geneID")]
 write.csv(final_output, "results.csv", row.names = FALSE)
