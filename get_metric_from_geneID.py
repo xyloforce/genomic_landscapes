@@ -1,78 +1,89 @@
 import csv
 import src.metric as metric
 import sys
-import classSpecies
+import src.classSpecies as classSpecies
 import src.ncbi as ncbi
-import os.path
+import os
 
-
-#ouverture du csv
+#opening of the csv.
 csvfile = open(sys.argv[1]) # CSV containing "taxid" "human_gene" "ortholog"
 csv_reader = csv.DictReader(csvfile)
-
-
-
 
 human_gene_set = set() # set of humans genes
 species_dic = dict() # dic of object species
 
-#récupération des espèces et des gènes associés.
+#recovery of species and associated genes.
 for row in csv_reader:
     human_gene_set.add(row["human_gene"]) # creates a set of all the available human genes
     if row["taxid"] not in species_dic: # if the species object for this taxid does not exists
         species_dic[row["taxid"]] = classSpecies.species(row["taxid"])
+        species_dic[row["taxid"]].set_species_name(row["species"])
     species_dic[row["taxid"]].add_gene(row["human_gene"], row["geneID"]) # uses the add_gene function to add the current ortholog to the species object
 
-#on parcours espèce par espèce
+#we browse species by species
 for taxid, classSpecies in species_dic.items():
-   #récupération des génomes sous forme de fasta et de gff
-   extracted_file_list=ncbi.get_genome(taxid)
-   pathToFasta= extracted_file_list[0]
-   pathToGFF= extracted_file_list[1]
+   print("download  gff and fasta files for the {} species ".format(classSpecies.species))
+   #recovery of genomes in the form of fasta and gff
+   extracted_file_list=ncbi.get_genome(classSpecies.species)
+   #verification that we have one fasta and one gff files.
+   if len(extracted_file_list) != 2:
+       if len(extracted_file_list)==1:
+           print("the fasta or the gff is missing for the {} species. We go to the next species".format(classSpecies.species))
+           os.remove(extracted_file_list[0])
+           continue
+       else:
+           print("there is more than one fasta or gff uploaded for the {} species. We go to the next species".format(classSpecies.species))
+           for i in extracted_file_list:
+               os.remove(i)
+           continue
+   pathToFasta= extracted_file_list[1]
+   pathToGFF= extracted_file_list[0]
    
-   #création d'un dictionnaire avec comme clé les taxID huamin et en valeur un objet info_gene.
+   #creation of a dictionary with the human taxID as key and an info_gene object in value
    genIDlist=dict()
    for humanid,genID in classSpecies.get_genes().items():
        genIDlist[genID[0]]=humanid
-       
-   #parsing du gff et du fasta pour obtenir les coordonnées des gènes, exons et les chromosomes
+   
+   #parsing of the gff to get the coordinates of genes, exons and chromosomes
+   print("gff parsing")
    dict_genes=metric.parsingGFF(genIDlist,pathToGFF)
+   #parsing of the fasta to obtain the sequences of the genes, exons and regions, flanking
+   print("fasta parsing")
    dict_genes=metric.parsing_fasta(dict_genes,pathToFasta)
    
    
-   #calcul des taux de GC
+   #calculation of GC rates from the sequences obtained
    for i in dict_genes.values():
        metric.taux_GC(i)
    
-   #obtention de la taille des introns
+   #obtaining the size of the introns
    metric.get_intron_size(dict_genes)
    
-   #création des différents fichiers de métrique (un par métrique)
+   #creation of different metric files (one per metric)
    if not os.path.isfile('metrics_GC_gene.txt'):
        metric.create_tab_metrics(human_gene_set,'GC_gene')
    metric.write_tab_metrics(dict_genes,'GC_gene',taxid)
+   
    if not os.path.isfile('metrics_GC_exons.txt'):
        metric.create_tab_metrics(human_gene_set,'GC_exons')
    metric.write_tab_metrics(dict_genes,'GC_exons',taxid)
+   
    if not os.path.isfile('metrics_GC3_exons.txt'):
        metric.create_tab_metrics(human_gene_set,'GC3_exons')
    metric.write_tab_metrics(dict_genes,'GC3_exons',taxid)
-   if not os.path.isfile('metrics_taille_intron.txt'):
-       metric.create_tab_metrics(human_gene_set,'taille_intron')
-   metric.write_tab_metrics(dict_genes,'taille_intron',taxid) 
-   if not os.path.isfile('metrics_taux_GC_flanquante_avant.txt'):
-       metric.create_tab_metrics(human_gene_set,'taux_GC_flanquante_avant')
-   metric.write_tab_metrics(dict_genes,'taux_GC_flanquante_avant',taxid)     
-   if not os.path.isfile('metrics_taux_GC_flanquante_apres.txt'):
-       metric.create_tab_metrics(human_gene_set,'taux_GC_flanquante_apres')
-   metric.write_tab_metrics(dict_genes,'taux_GC_flanquante_apres',taxid)   
-      
    
+   if not os.path.isfile('metrics_intron_size.txt'):
+       metric.create_tab_metrics(human_gene_set,'intron_size')
+   metric.write_tab_metrics(dict_genes,'intron_size',taxid)
    
+   if not os.path.isfile('metrics_GC_flanking_region_before.txt'):
+       metric.create_tab_metrics(human_gene_set,'GC_flanking_region_before')
+   metric.write_tab_metrics(dict_genes,'GC_flanking_region_before',taxid)
    
-
-
-
-
-
-
+   if not os.path.isfile('metrics_GC_flanking_region_after.txt'):
+       metric.create_tab_metrics(human_gene_set,'GC_flanking_region_after')
+   metric.write_tab_metrics(dict_genes,'GC_flanking_region_after',taxid)
+   
+   os.remove(pathToFasta)
+   os.remove(pathToGFF)
+   

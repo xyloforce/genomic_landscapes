@@ -97,7 +97,6 @@ def get_genome(species_name):
     results = utilities.query_xpath(xml, './/Item[@Name="Assembly_Accession"]')
     accession = results[0].text
 
-    print(accession)
 
     # get ftp URL for accession
     xml = utilities.get_xml(esearch, {"db": "assembly", "term": accession, "retmax": "200", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
@@ -111,7 +110,6 @@ def get_genome(species_name):
     results = utilities.query_xpath(xml, './/FtpPath_RefSeq')
 
     filelist = get_files_from_ftp(results[0].text)
-    print(filelist)
     fasta_list = list()
     to_extract = list()
     extracted = list()
