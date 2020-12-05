@@ -177,16 +177,19 @@ def calcul_GC(list_sequence,type_GC):
     if len(list_sequence)==0:
         taux_GC='NA'
         return taux_GC
+    size=len(list_sequence)
     for i in list_sequence:
         if len(i)==0:
+            size=size-1
             continue
         try:
             sequence = GC123(i)
             sequence = sequence[int(type_GC)]
             taux_GC.append(sequence)
         except:
+            size=size-1
             continue
-    taux_GC = sum(taux_GC)/len(list_sequence)
+    taux_GC = sum(taux_GC)/size
     return taux_GC
 
 def taux_GC(objet):
