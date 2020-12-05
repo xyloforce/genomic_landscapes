@@ -189,7 +189,11 @@ def calcul_GC(list_sequence,type_GC):
         except:
             size=size-1
             continue
-    taux_GC = sum(taux_GC)/size
+    try:
+        taux_GC = sum(taux_GC)/size
+    except:
+        taux_GC='NA'
+        return taux_GC        
     return taux_GC
 
 def taux_GC(objet):
