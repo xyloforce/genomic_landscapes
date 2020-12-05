@@ -61,6 +61,7 @@ if isNeeded2(genomeGenesList, 'orthologs_groups.json'):
 else:
     with open('orthologs_groups.json') as json_file:
         orthologs_groups = json.load(json_file)
+        print("Orthologs OK")
 
 if isNeeded(orthologs_groups, 'gene_ids.json'):
     # ====== get the orthologs IDs ====== #
@@ -71,16 +72,18 @@ if isNeeded(orthologs_groups, 'gene_ids.json'):
 else:
     with open('gene_ids.json') as json_file:
         gene_ids = json.load(json_file)
+        print("Orthologs groups OK")
 
 if isNeeded(gene_ids, 'ncbi_gene_ids.json'):
     # ====== get the orthologs NCBI IDs ====== #
-    print("Searching contents of orthologs groups")
+    print("Searching NCBI IDs")
     ncbi_gene_ids = orthodb.ogdetails(gene_ids, PATH_TO_GENE_XREFS)  # ncbi gene_ids is dict of human:(ncbi_geneids)
     with open('ncbi_gene_ids.json', 'w') as json_file:
         json.dump(ncbi_gene_ids, json_file)
 else:
     with open('ncbi_gene_ids.json') as json_file:
         ncbi_gene_ids = json.load(json_file)
+        print("NCBI gene IDs OK")
 
 species = dict() # dict of species_name:row_to_write, avoid duplicating taxo info, can't write row immediately because we need to harmonize taxo length first
 max_len = 0 # len of the max lineage
