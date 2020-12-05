@@ -4,7 +4,6 @@ from BCBio.GFF import GFFExaminer
 from BCBio import GFF
 from Bio import SeqIO
 import gzip
-from Bio.Alphabet import generic_dna
 import re
 import os.path
 
