@@ -10,6 +10,7 @@ import sys
 import ftplib
 import gzip
 import re
+import threading
 
 try:
     from . import utilities
@@ -26,12 +27,25 @@ efetch = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 
 def summary_genes(values):
     count = 0
-    max_query = 199
+    max_query = 100
     result_dict = dict()
+    temp_dict = dict()
+    running_threads = dict()
+    count_threads = 0
+
     while count < len(values):
-        to_request = values[count:count+max_query]
-        result_dict.update(get_summary(to_request, lineage=False))
-        count += max_query
+        while threading.activeCount() < 5: # dont overload the server
+            if count > len(values):
+                break
+            count_threads += 1
+            to_request = values[count:count+max_query]
+            running_threads[count_threads] = threading.Thread(target=get_summary, args=(to_request, False, temp_dict, count_threads))
+            running_threads[count_threads].start()
+            count += max_query
+        for i in running_threads: # wait until everyone finishes
+            running_threads[i].join()
+    for j in temp_dict:
+        result_dict.update(temp_dict[j])
     return result_dict
 
 
@@ -59,7 +73,7 @@ def lineage(taxid):
     return lineage
 
 
-def get_summary(geneIDs, lineage=False):
+def get_summary(geneIDs, lineage=False, storage = None, key = None):
     efetch = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
     result_dic = dict()
 
@@ -74,6 +88,10 @@ def get_summary(geneIDs, lineage=False):
                 result_dic[geneID] = [species_name, taxid, lineage]
             else:
                 result_dic[geneID] = [species_name, taxid]
+
+    if not storage == None:
+        storage[key] = result_dic
+
     return result_dic
 
 
