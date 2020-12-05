@@ -180,9 +180,12 @@ def calcul_GC(list_sequence,type_GC):
     for i in list_sequence:
         if len(i)==0:
             continue
-        sequence = GC123(i)
-        sequence= sequence[int(type_GC)]
-        taux_GC.append(sequence)
+        try:
+            sequence = GC123(i)
+            sequence = sequence[int(type_GC)]
+            taux_GC.append(sequence)
+        except:
+            continue
     taux_GC = sum(taux_GC)/len(list_sequence)
     return taux_GC
 
