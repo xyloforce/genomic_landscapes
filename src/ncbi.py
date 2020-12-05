@@ -112,16 +112,26 @@ def get_genome(species_name):
 
     filelist = get_files_from_ftp(results[0].text)
     print(filelist)
+    fasta_list = list()
+    to_extract = list()
     extracted = list()
 
     for filename in filelist:
-        if re.search("GCF_\d+.\d+_[A-Za-z.0-9]+_genomic\.fna\.gz", filename) is not None or filename.endswith(".gff.gz"):  # only one element in theory
-            request = utilities.get_request("https://" + "/".join(results[0].text.split("/")[2:]) + "/" + filename)
-            filename_uncompressed = ".".join(filename.split(".")[:-1])
-            uncompressed_handler = open(filename_uncompressed, "wb")
-            uncompressed_handler.write(gzip.decompress(request.content))
-            uncompressed_handler.close()
-            extracted.append(filename_uncompressed)
+        if filename.endswith("genomic.fna.gz"):
+            fasta_list.append(filename)
+        elif filename.endswith("gff.gz"): # only one gff by folder
+            to_extract.append(filename)
+
+    fasta_list.sort(key = len) # select the smallest filename : the true genomic
+    to_extract.append(fasta_list[0])
+
+    for filename in to_extract:
+        request = utilities.get_request("https://" + "/".join(results[0].text.split("/")[2:]) + "/" + filename)
+        filename_uncompressed = ".".join(filename.split(".")[:-1])
+        uncompressed_handler = open(filename_uncompressed, "wb")
+        uncompressed_handler.write(gzip.decompress(request.content))
+        uncompressed_handler.close()
+        extracted.append(filename_uncompressed)
 
     return extracted
 
