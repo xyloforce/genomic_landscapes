@@ -63,7 +63,7 @@ def get_summary(geneIDs, lineage=False):
     efetch = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
     result_dic = dict()
 
-    xml = utilities.get_xml(efetch, {"db": "gene", "id": ",".join(geneIDs), "retmode": "xml", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
+    xml = utilities.get_xml(efetch, {"db": "gene", "id": ",".join(geneIDs), "retmode": "xml", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"}, False, 0.1)
     elements = utilities.query_xpath(xml, "./")
     for geneID, element in zip(geneIDs, elements):
         if utilities.query_xpath(element, ".//Gene-track_geneid") != []:  # if it's not an empty match

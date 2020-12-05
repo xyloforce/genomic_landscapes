@@ -8,17 +8,18 @@ import os
 # some functions who can't go anywhere else
 
 
-def get_request(baseURL, payload={}):
+def get_request(baseURL, payload={}, verbose=False, wait=1):
     """
     Try to make a correct request.
     """
     retry = True
     numberTry = 0
     while retry and numberTry < 10:  # retry max 10
-        time.sleep(1 + numberTry)
+        time.sleep(wait + numberTry)
         # request add to the baseURL the params passed as dict
         request = requests.get(baseURL, params=payload)
-        print("Requested " + request.url, end=" - code: ")
+        if verbose:
+            print("Requested " + request.url, end=" - code: ")
         if request.status_code == 200:
             print("200 OK")
             return request
@@ -45,11 +46,11 @@ def get_request(baseURL, payload={}):
     return None  # no request body
 
 
-def get_data(baseURL, payload={}):
+def get_data(baseURL, payload={}, verbose = False, wait=1):
     retry = True
     while retry:  # RETRY UNTIL SUCCES U SONOFAGUN
         try:
-            request = get_request(baseURL, payload)
+            request = get_request(baseURL, payload, verbose, wait)
             data = request.json()["data"]
         except ValueError:
             print("Error : JSON invalid. Retrying...")
@@ -58,11 +59,11 @@ def get_data(baseURL, payload={}):
     return data
 
 
-def get_xml(baseURL, payload={}):
+def get_xml(baseURL, payload={}, verbose = False, wait=1):
     retry = True
     while retry:  # RETRY UNTIL SUCCES U SONOFAGUN
         try:
-            request = get_request(baseURL, payload)
+            request = get_request(baseURL, payload, verbose, wait)
             data = xml.etree.ElementTree.fromstring(request.text)
         except ValueError:
             print("Error : XML invalid. Retrying...")
