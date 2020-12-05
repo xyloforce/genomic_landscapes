@@ -6,7 +6,6 @@ import os
 
 import src.orthodb as orthodb
 import src.ncbi as ncbi
-import classSpecies
 
 
 PATH_TO_OG2genes = "orthodb_data/odb10v1_OG2genes.tab" # orthodb_data/odb10v1_OG2genes.tab
