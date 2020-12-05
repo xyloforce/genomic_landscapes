@@ -22,6 +22,19 @@ for row in csv_reader:
 
 #we browse species by species
 for taxid, classSpecies in species_dic.items():
+   if os.path.isfile('work_done.txt'):
+       exist=False
+       work_done = open('work_done.txt','r')
+       lignes = work_done.readlines()
+       work_done.close()
+       for i in lignes:
+           if int(i)==int(taxid):
+               print(" We already have metrics for the species {}. We move on to the next specie. ".format(classSpecies.species))
+               exist=True
+
+       if exist==True:
+           continue
+           
    print("download  gff and fasta files for the {} species ".format(classSpecies.species))
    #recovery of genomes in the form of fasta and gff
    extracted_file_list=ncbi.get_genome(classSpecies.species)
@@ -84,6 +97,16 @@ for taxid, classSpecies in species_dic.items():
        metric.create_tab_metrics(human_gene_set,'GC_flanking_region_after')
    metric.write_tab_metrics(dict_genes,'GC_flanking_region_after',taxid)
    
+   
+   if not os.path.isfile('work_done.txt'):
+       work_done = open('work_done.txt','w')
+       work_done.write(str(taxid)+'\n')
+       work_done.close()   
+   else:
+       work_done=open('work_done.txt','a')
+       work_done.write(str(taxid)+'\n')
+       work_done.close()
    os.remove(pathToFasta)
    os.remove(pathToGFF)
-   
+
+os.remove("work_done.txt")   
