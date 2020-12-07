@@ -91,6 +91,7 @@ h_csv_results = open("species_taxid_geneID.csv", "w")
 h_csv_taxo = open("taxo_reference.csv", "w")
 
 results_writer = csv.writer(h_csv_results)
+results_writer.writerow(["human_gene", "species", "taxid", "geneID"])
 taxo_writer = csv.writer(h_csv_taxo)
 
 for gene in ncbi_gene_ids:
@@ -99,7 +100,7 @@ for gene in ncbi_gene_ids:
     for ortholog in query_dict:
         species_name = query_dict[ortholog][0]
         taxid = query_dict[ortholog][1]
-        results_writer.writerow([species_name, taxid, gene])
+        results_writer.writerow([gene, species_name, taxid, ortholog])
         if taxid not in species:
             lineage = ncbi.lineage(taxid)
             list_infos = [species_name, taxid]
