@@ -60,7 +60,7 @@ if isNeeded2(genomeGenesList, 'orthologs_groups.json'):
 else:
     with open('orthologs_groups.json') as json_file:
         orthologs_groups = json.load(json_file)
-        print("Orthologs OK")
+        print("Orthologs groups OK")
 
 if isNeeded(orthologs_groups, 'gene_ids.json'):
     # ====== get the orthologs IDs ====== #
@@ -71,7 +71,8 @@ if isNeeded(orthologs_groups, 'gene_ids.json'):
 else:
     with open('gene_ids.json') as json_file:
         gene_ids = json.load(json_file)
-        print("Orthologs groups OK")
+        print("Orthologs IDs OK")
+        del(orthologs_groups)
 
 if isNeeded(gene_ids, 'ncbi_gene_ids.json'):
     # ====== get the orthologs NCBI IDs ====== #
@@ -83,6 +84,7 @@ else:
     with open('ncbi_gene_ids.json') as json_file:
         ncbi_gene_ids = json.load(json_file)
         print("NCBI gene IDs OK")
+        del(gene_ids)
 
 species = dict() # dict of species_name:row_to_write, avoid duplicating taxo info, can't write row immediately because we need to harmonize taxo length first
 max_len = 0 # len of the max lineage

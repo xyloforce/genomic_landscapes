@@ -28,18 +28,19 @@ efetch = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 
 def summary_genes(values):
     count = 0
-    max_query = 100
+    max_query = 200
     result_dict = dict()
     temp_dict = dict()
     running_threads = dict()
     count_threads = 0
+    max_threads = 10
 
     start_time = time.time()
 
     # TODO : measure time to ensure that we optimize it
 
     while count < len(values):
-        while threading.activeCount() < 5: # dont overload the server
+        while threading.activeCount() < max_threads: # dont overload the server
             if count > len(values):
                 break
             count_threads += 1
@@ -86,7 +87,7 @@ def get_summary(geneIDs, lineage=False, storage = None, key = None, wait = 0.1):
     efetch = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
     result_dic = dict()
 
-    xml = utilities.get_xml(efetch, {"db": "gene", "id": ",".join(geneIDs), "retmode": "xml", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"}, True, wait)
+    xml = utilities.get_xml(efetch, {"db": "gene", "id": ",".join(geneIDs), "retmode": "xml", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"}, False, wait)
     elements = utilities.query_xpath(xml, "./")
     for geneID, element in zip(geneIDs, elements):
         if utilities.query_xpath(element, ".//Gene-track_geneid") != []:  # if it's not an empty match
