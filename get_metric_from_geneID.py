@@ -37,7 +37,10 @@ for taxid, classSpecies in species_dic.items():
            
    print("download  gff and fasta files for the {} species ".format(classSpecies.species))
    #recovery of genomes in the form of fasta and gff
-   extracted_file_list=ncbi.get_genome(classSpecies.species)
+   try:
+       extracted_file_list=ncbi.get_genome(classSpecies.species)
+   except:
+       continue
    #verification that we have one fasta and one gff files.
    if len(extracted_file_list) != 2:
        if len(extracted_file_list)==1:
@@ -73,27 +76,27 @@ for taxid, classSpecies in species_dic.items():
    metric.get_intron_size(dict_genes)
    
    #creation of different metric files (one per metric)
-   if not os.path.isfile('metrics_GC_gene.txt'):
+   if not os.path.isfile('metrics_GC_gene.tsv'):
        metric.create_tab_metrics(human_gene_set,'GC_gene')
    metric.write_tab_metrics(dict_genes,'GC_gene',taxid)
    
-   if not os.path.isfile('metrics_GC_exons.txt'):
+   if not os.path.isfile('metrics_GC_exons.tsv'):
        metric.create_tab_metrics(human_gene_set,'GC_exons')
    metric.write_tab_metrics(dict_genes,'GC_exons',taxid)
    
-   if not os.path.isfile('metrics_GC3_exons.txt'):
+   if not os.path.isfile('metrics_GC3_exons.tsv'):
        metric.create_tab_metrics(human_gene_set,'GC3_exons')
    metric.write_tab_metrics(dict_genes,'GC3_exons',taxid)
    
-   if not os.path.isfile('metrics_intron_size.txt'):
+   if not os.path.isfile('metrics_intron_size.tsv'):
        metric.create_tab_metrics(human_gene_set,'intron_size')
    metric.write_tab_metrics(dict_genes,'intron_size',taxid)
    
-   if not os.path.isfile('metrics_GC_flanking_region_before.txt'):
+   if not os.path.isfile('metrics_GC_flanking_region_before.tsv'):
        metric.create_tab_metrics(human_gene_set,'GC_flanking_region_before')
    metric.write_tab_metrics(dict_genes,'GC_flanking_region_before',taxid)
    
-   if not os.path.isfile('metrics_GC_flanking_region_after.txt'):
+   if not os.path.isfile('metrics_GC_flanking_region_after.tsv'):
        metric.create_tab_metrics(human_gene_set,'GC_flanking_region_after')
    metric.write_tab_metrics(dict_genes,'GC_flanking_region_after',taxid)
    
@@ -109,4 +112,4 @@ for taxid, classSpecies in species_dic.items():
    os.remove(pathToFasta)
    os.remove(pathToGFF)
 
-os.remove("work_done.txt")   
+os.remove("work_done.tsv")   
