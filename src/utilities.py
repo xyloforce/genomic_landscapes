@@ -21,7 +21,8 @@ def get_request(baseURL, payload={}, verbose=False, wait=1):
         if verbose:
             print("Requested " + request.url, end=" - code: ")
         if request.status_code == 200:
-            print("200 OK")
+            if verbose:
+                print("200 OK")
             return request
         else:
             if request.status_code == 404:

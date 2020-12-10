@@ -60,7 +60,7 @@ if isNeeded2(genomeGenesList, 'orthologs_groups.json'):
 else:
     with open('orthologs_groups.json') as json_file:
         orthologs_groups = json.load(json_file)
-        print("Orthologs OK")
+        print("Orthologs groups OK")
 
 if isNeeded(orthologs_groups, 'gene_ids.json'):
     # ====== get the orthologs IDs ====== #
@@ -71,7 +71,8 @@ if isNeeded(orthologs_groups, 'gene_ids.json'):
 else:
     with open('gene_ids.json') as json_file:
         gene_ids = json.load(json_file)
-        print("Orthologs groups OK")
+        print("Orthologs IDs OK")
+        del(orthologs_groups)
 
 if isNeeded(gene_ids, 'ncbi_gene_ids.json'):
     # ====== get the orthologs NCBI IDs ====== #
@@ -83,6 +84,7 @@ else:
     with open('ncbi_gene_ids.json') as json_file:
         ncbi_gene_ids = json.load(json_file)
         print("NCBI gene IDs OK")
+        del(gene_ids)
 
 species = dict() # dict of species_name:row_to_write, avoid duplicating taxo info, can't write row immediately because we need to harmonize taxo length first
 max_len = 0 # len of the max lineage
@@ -91,15 +93,16 @@ h_csv_results = open("species_taxid_geneID.csv", "w")
 h_csv_taxo = open("taxo_reference.csv", "w")
 
 results_writer = csv.writer(h_csv_results)
+results_writer.writerow(["human_gene", "species", "taxid", "geneID"])
 taxo_writer = csv.writer(h_csv_taxo)
 
 for gene in ncbi_gene_ids:
     print("Querying gene " + str(list(ncbi_gene_ids.keys()).index(gene)) + "/" + str(len(ncbi_gene_ids.keys())))
-    query_dict = ncbi.summary_genes(' '.join(ncbi_gene_ids[gene]))
+    query_dict = ncbi.summary_genes(ncbi_gene_ids[gene])
     for ortholog in query_dict:
         species_name = query_dict[ortholog][0]
         taxid = query_dict[ortholog][1]
-        results_writer.writerow([species_name, taxid, gene])
+        results_writer.writerow([gene, species_name, taxid, ortholog])
         if taxid not in species:
             lineage = ncbi.lineage(taxid)
             list_infos = [species_name, taxid]

@@ -16,8 +16,9 @@ def search(genes, ncbi=1, level=32523):
     """
     groups = dict()
     for gene in genes:
+        print("Querying gene " + str(list(genes).index(gene)) + "/" + str(len(genes)))
         data = utilities.get_data("https://www.orthodb.org/search",
-                                  {'query': gene, 'ncbi': ncbi, 'level': level})
+                                  {'query': gene, 'ncbi': ncbi, 'level': level}, False, 0.1)
         groups[gene] = data
     return groups
 
@@ -28,18 +29,17 @@ def orthologs(groups, csv_source):
     """
     orthologs = dict()
     parsed = dict()
-    csvfile = open(csv_source)
-    csv_reader = csv.DictReader(csvfile, dialect=csv.excel_tab(), fieldnames=['OG', 'geneID'])
-    for row in csv_reader:
-        if row['OG'] not in parsed:
-            parsed[row["OG"]] = list()
-        parsed[row["OG"]].append(row["geneID"])
     for gene in groups:
-        for group in groups[gene]:
-            if gene not in orthologs:  # forgot to initialize
-                orthologs[gene] = list()
-            orthologs[gene] = orthologs[gene] + parsed[group]
-            orthologs[gene] = list(set(orthologs[gene]))
+        csvfile = open(csv_source)
+        print("Searching gene " + str(list(groups).index(gene)) + "/" + str(len(groups)))
+        csv_reader = csv.DictReader(csvfile, dialect=csv.excel_tab(), fieldnames=['OG', 'geneID'])
+        for row in csv_reader:
+            if row["OG"] in groups[gene]:
+                if gene not in orthologs:  # forgot to initialize
+                    orthologs[gene] = list()
+                orthologs[gene].append(row["geneID"])
+                orthologs[gene] = list(set(orthologs[gene]))
+        csvfile.close()
     return orthologs
 
 
