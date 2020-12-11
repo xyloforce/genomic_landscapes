@@ -40,6 +40,7 @@ for taxid, classSpecies in species_dic.items():
    try:
        extracted_file_list=ncbi.get_genome(classSpecies.species)
    except:
+       print("we  not find the fasta and the gff of the complete genome of {} species, we move on to the next specie.".format(classSpecies.species))
        continue
    #verification that we have one fasta and one gff files.
    if len(extracted_file_list) != 2:
@@ -112,4 +113,4 @@ for taxid, classSpecies in species_dic.items():
    os.remove(pathToFasta)
    os.remove(pathToGFF)
 
-os.remove("work_done.tsv")   
+os.remove("work_done.txt")   
