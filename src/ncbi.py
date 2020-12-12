@@ -59,23 +59,22 @@ def summary_genes(values):
     return result_dict
 
 
-def taxonomy(taxid):
+def taxonomy(taxid, verbose = False):
     """
     Get info from corresponding database ncbi taxonomy.
 
     return xml
     """
     base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
-    xml = utilities.get_xml(base_url, {"db": "taxonomy", "id": taxid, "rettype": "xml", "retmode": "text", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
+    xml = utilities.get_xml(base_url, {"db": "taxonomy", "id": taxid, "rettype": "xml", "retmode": "text", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"}, verbose)
     return xml
 
 
-def lineage(taxid):
+def lineage(taxid, verbose = False):
     """
     Get only lineage from global taxonomy record.
-
     """
-    xml = taxonomy(taxid)
+    xml = taxonomy(taxid, verbose)
     lineage = utilities.query_xpath(xml, ".//Lineage")
     lineage = lineage[0].text
     lineage = lineage.split("; ")

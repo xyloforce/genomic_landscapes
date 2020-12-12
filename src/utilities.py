@@ -7,6 +7,38 @@ import os
 
 # some functions who can't go anywhere else
 
+def isNeeded(old_dic, saved_json):
+    """
+    check if an existing file is complete
+    """
+    try:
+        with open(saved_json) as json_file:
+            new_dic = json.load(json_file)
+    except:
+        return True
+    else:
+        needed = False
+        for key in old_dic:
+            if not len(old_dic[key]) == 0:
+                if key not in new_dic:
+                    needed = True
+                    print("Missing value : " + key)
+        return needed
+
+
+def isNeeded2(old_list, saved_json):
+    try:
+        with open(saved_json) as json_file:
+            new_dic = json.load(json_file)
+    except:
+        return True
+    else:
+        needed = False
+        for value in old_list:
+            if value not in new_dic:
+                needed = True
+                print("Missing value : " + value)
+        return needed
 
 def get_request(baseURL, payload={}, verbose=False, wait=1):
     """
