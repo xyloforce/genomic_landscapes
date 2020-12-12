@@ -63,6 +63,8 @@ def get_intron_size(dict_gene):
     for gene in dict_gene.values():
         # calculating introns size
         list_taille_exons = []
+        if len(gene.genes) !=2:
+            continue
         taille_gene= abs(int(gene.genes[1])-int(gene.genes[0]))
         for exon in gene.exons.values():
             taille_One_exon=abs(int(exon[1])-int(exon[0]))
@@ -106,6 +108,8 @@ def parsingGFF(dico_geneID, fileGFF):
                     dict_info_gene[humanid].set_chromosome(match.group(1))
                 if match.group(2) == "gene":
                     tuple_gene=(match.group(3), match.group(4))
+                    if len(tuple_gene)!=2:
+                        continue
                     dict_info_gene[humanid].set_genes(tuple_gene)
                 if match.group(2) == "exon":
                     exons={}
@@ -132,15 +136,15 @@ def parsing_fasta(dico_info_gene, fasta):
     
     #browse of info_gene objects
     for info_gene in dico_info_gene.values():
-        for fasta in records:
-        
+        for fasta in records:      
             #take only the fasta sequence of our info_gene object
             if fasta.id == info_gene.chr:
-            
                 #transform the fasta sequence into a character string
                 fasta_sequence = str(fasta.seq)
                 
                 #gene sequence recovery
+                if len(info_gene.genes) != 2:
+                    continue
                 start_gene= int(info_gene.genes[0])
                 end_gene= int(info_gene.genes[1])
                 sequence_gene = fasta_sequence[start_gene:end_gene]
@@ -214,7 +218,7 @@ def taux_GC(objet):
 
 def create_tab_metrics(set_human_gene,metrics):
     "create a metric file"
-    file_metric = open('metrics_{}.txt'.format(metrics),'w')
+    file_metric = open('metrics_{}.tsv'.format(metrics),'w')
     file_metric.write("genome reference"+"\t")
     for humanID in set_human_gene:
         file_metric.write(str(humanID)+"\t")
@@ -226,12 +230,12 @@ def write_tab_metrics(dico_metric,metrics,taxID):
     """
     take a dictionnairy of metrics dico_metric[id_humans]=info_gene and write the metrics to the last line of an output tabulate file
     """
-    read_metric=open('metrics_{}.txt'.format(metrics),'r')
+    read_metric=open('metrics_{}.tsv'.format(metrics),'r')
     id_human=read_metric.readline()
     read_metric.close()
     id_human=id_human.split('\t')
     del id_human[-1]
-    file_metric_2 = open('metrics_{}.txt'.format(metrics),'a')
+    file_metric_2 = open('metrics_{}.tsv'.format(metrics),'a')
     file_metric_2.write(taxID+"\t")
     for index,human_id in enumerate(id_human):
         if index==0:
