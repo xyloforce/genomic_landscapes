@@ -1,14 +1,18 @@
+#!/usr/bin/env Rscript
+
+## AS THE FOLLOWING LINES IMPLIES THIS SCRIPT IS TO BE RUN WITH RSCRIPT, SEE DOCUMENTATION FOR FURTHER REFERENCE ##
+args = commandArgs(trailingOnly=TRUE)
+
 library(dplyr)
 length_uniq <- function(x) {
   return (length(unique(x)))
 }
 
-species_gene_humanortho <- read.csv("species_gene_humanortho.csv")
+species_gene_humanortho <- read.csv(args[1]) # select file given as arg
 species_gene_humanortho[species_gene_humanortho$species == "Monachus schauinslandi", 2] <- "Neomonachus schauinslandi" # same thing : see https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=29088
 taxo_reference <- read.csv("taxo_reference.csv", header=FALSE, sep=",", fill = TRUE)
 speciesbygenre = aggregate(x = taxo_reference$V1, by = list(taxo_reference$V13), FUN=length) # tweak this parameter to find optimal level
 
-###### first sort by genre + percent of unique orthologs #####
 orthologs_by_species=aggregate(species_gene_humanortho$human_gene, by=list(species_gene_humanortho$species), FUN=length_uniq) # human gene: number of hits by species by gene
 orthologs_by_species$percent = orthologs_by_species$x/length(unique(species_gene_humanortho$human_gene))*100 # get percent of human genes with orthologs
 

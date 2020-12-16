@@ -1,5 +1,8 @@
+#!/usr/bin/env Rscript
+args = commandArgs(trailingOnly=TRUE)
+
 # Load data
-metrics2 = read.csv("Metrics/metrics_GC_flanking_region_before.tsv", na.strings="NA", check.names=FALSE, stringsAsFactors = FALSE, sep="\t", row.names = 1)
+metrics2 = read.csv(args[1], na.strings="NA", check.names=FALSE, stringsAsFactors = FALSE, sep="\t", row.names = 1)
 # delete full NA rows / columns
 metrics2 <- metrics2[,colSums(is.na(metrics2))<nrow(metrics2)]
 metrics2 =  metrics2[rowSums(is.na(metrics2)) != ncol(metrics2), ]
@@ -17,7 +20,7 @@ colors = colorRampPalette(c("blue", "white", "red"))
 # make a label list to indicate which chromosom is displayed
 labelCols = gene_infos[match(colnames(metrics2), gene_infos$V2),3]
 # print the heatmap
-heatmap(data.matrix(metrics2), Colv = NA, col = colors(100), labCol = labelCols, xlab = "Chromosomes", main = "Taux de GC des régions flanquantes amont par espèce")
+heatmap(data.matrix(metrics2), Colv = NA, col = colors(100), labCol = labelCols, xlab = "Chromosomes", main = args[2])
 # add ylab (badly positionned by default)
 mtext("Espèces", side=2, line=0)
 

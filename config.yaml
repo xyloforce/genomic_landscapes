@@ -1,0 +1,2 @@
+metrics: {"GC3_exons":"Taux de GC en position 3 des exons", "GC_exons":"Taux de GC des exons", "GC_flanking_before":"Taux de GC des régions flanquantes amont", "GC_flanking_after":"Taux de GC des régions flanquantes aval", "GC_gene":"Taux de GC globaux des gènes", "intron_size":"Taille des introns"}
+human_annotation: "path/to/gff"

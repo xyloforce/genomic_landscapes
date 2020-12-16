@@ -119,7 +119,7 @@ for gene in ncbi_gene_ids:
                     species[taxid] = list_infos
 
 for taxid in species:
-    while len(species[taxid]) < max_length: # add empty columns until its OK
+    while len(species[taxid]) < max_len: # add empty columns until its OK
         species[taxid].append("")
     csv_taxonomy_writer.writerow(species[taxid]) # then write row
 
