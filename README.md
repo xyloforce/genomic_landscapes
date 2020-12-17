@@ -1,39 +1,61 @@
-# Caractérisation spatio-temporelle de l’évolution des paysages génomiques chez les vertébrés
+# Characterization of genomic landscapes
 
 ## Introduction
 
-### Auteurs
+### Authors
 
-Ce projet universitaire a été confié à trois étudiants du master de bioinformatique de Lyon 1.
+This is a master's degree project for the LBBE (Laboratoire de Biométrique et de Biologie Évolutive), made by students from the *Master de bioinformatique* from Lyon.
 
-### Contexte
+### Context
 
-Représentation graphique de différentes métriques sur un génome de référence.
+The aim of this collection of scripts is to allow the user to plot various metrics relative to the genome's composition. It allows both to build a csv database of mappings between the genes of one species and all the other in the choosen group and to download and calculate metrics on the genome of selected species.
 
-## Utilisation
+## How-to
 
-L’adresse web vers le ficthier compressé du génome doit être modifiée dans `script.sh`.
+### Installation
 
-Commandes à lancer :
-```bash
-./script.sh genomefile geneList
-# genome is a gff file if not preset script will download a gff from ncbi
-# geneList is a json file, contain list of gene extracted from genomeFile
+The wrapper script is written in Snakemake. Here's the procedure to follow to install snakemake through conda and allow for optimal integration :
+
+1. Install [conda](https://docs.conda.io/en/latest/miniconda.html#linux-installers)
+2. Setup bioconda channels:
 ```
-
-Modification possible à faire dans le script :
-
-- url du génome (ftp://ftp.ncbi.nlm.nih.gov/genomes/all/annotation_releases/9606/109.20200815/GCF_000001405.39_GRCh38.p13/GCF_000001405.39_GRCh38.p13_genomic.gff.gz)
-- version des database d’orthodb (`OGs to genes correspondence` and `xrefs associated with Ortho DB gene` from https://www.orthodb.org/?page=filelist)
-
-### Récupération des gff et fasta
-
-```bash
-python src/ncbi.py exe [taxid]
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
 ```
+3. Install snakemake (`conda install snakemake`)
 
-Les sorties se trouvent par défaut dans le répertoire `/tmp/genome`. Cette destination est modifiable dans le script.
+If you don't intend to use snakemake, you can install manually the dependencies and use the scripts one by one. You'll need the following python packages:
 
-### Calcul des métriques
+- `requests`
+- `biopython`
+- `bcbiogff`
 
-TODO : Écrire la doc
+and the R package `dplyr`.
+
+You'll also need:
+
+- any annotation file for the reference species (whose genes will be searched on orthodb)
+- two files from orthodb: `OGs to genes correspondence` and `xrefs associated with Ortho DB gene` from https://www.orthodb.org/?page=filelist
+
+File paths are to be set in the config.yaml or given to the proper script.
+
+### Use
+
+#### Conda
+
+A global interface is available through snakemake. To use the full pipeline (creation of datasets, download of genome and plotting), run `snakemake -j 1 --use-conda`. This will create the conda envs for the pipeline and then run it with one core (no parts are multi-threaded so that's not a problem)
+
+To use only the update part, run `snakemake -j 1 --use-conda update`.
+
+To use only the plotting part, just make sure that all files created by update are in the folder and run `snakemake -j 1 --use-conda` again.
+
+#### Manual
+
+Individual scripts do the following:
+
+- `get_gene_names.py`: get gene names from gff, outputs a json file containing a list of genes and a csv containing informations about genes for plotting (chromosome, start position, symbol)
+- `get_orthologs.py`: get the orthologs of geneIDs passed as json to the script, outputs two csv, one with taxonomy information and the other with the genes/species associated with each gene from the species
+- `species_selection.R`: select species from the file created by the preceding script in order to optimize plotting
+- `get_metrics_from_geneID.py`: download genomes and creates metrics files.
+- `heatmap.R`: plot values created by the preceding script as an heatmap.

@@ -1,6 +1,5 @@
 #!/usr/bin/env Rscript
-
-## AS THE FOLLOWING LINES IMPLIES THIS SCRIPT IS TO BE RUN WITH RSCRIPT, SEE DOCUMENTATION FOR FURTHER REFERENCE ##
+# This script is to be run with Rscript and given as arg the name of the file to be filtered
 args = commandArgs(trailingOnly=TRUE)
 
 library(dplyr)
