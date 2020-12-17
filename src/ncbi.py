@@ -4,7 +4,6 @@
 ##########################################################
 # Library python for project M1 2020
 # version 0.6
-# datasets version use is 10.5
 ##########################################################
 import sys
 import ftplib
@@ -17,10 +16,6 @@ try:
     from . import utilities
 except ImportError:
     import utilities
-
-PATH_DATASET = "./datasets"
-SUBTYPE_LIST = ["accession", "taxon", "gene-id", "symbol"]  # from NCBI documentation
-VERBOSE = True  # simple verbose mode, recommandation to false
 
 esearch = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
 efetch = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
