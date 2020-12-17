@@ -2,7 +2,7 @@ configfile: "config.yaml"
 
 rule graphs:
     input:
-        expand("{metrics}.png", metrics = lambda: config["metrics"].keys())
+        expand("{metrics}.png", metrics = config["metrics"].keys())
 
 rule update:
     input:
@@ -52,11 +52,11 @@ rule metrics:
 
 rule heatmap:
     input:
-        "{metrics}.csv", "taxo_reference.csv", "gene_infos.csv"
+        "metrics_{metrics}.tsv", "taxo_reference.csv", "gene_infos.csv"
     output:
         "{metrics}.png"
     params:
-        lambda wildcards: config["metrics"][{wildcards.metrics}]
+        lambda wildcards: config["metrics"][wildcards.metrics]
     conda:
         "envs/R.yaml"
     shell:

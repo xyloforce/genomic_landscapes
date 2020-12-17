@@ -1,4 +1,4 @@
-metrics: {"GC3_exons":"Taux de GC en position 3 des exons", "GC_exons":"Taux de GC des exons", "GC_flanking_before":"Taux de GC des régions flanquantes amont", "GC_flanking_after":"Taux de GC des régions flanquantes aval", "GC_gene":"Taux de GC globaux des gènes", "intron_size":"Taille des introns"}
+metrics: {"GC3_exons":"Taux_de_GC_en_position_3_des_exons", "GC_exons":"Taux_de_GC_des_exons", "GC_flanking_region_before":"Taux_de_GC_des régions_flanquantes_amont", "GC_flanking_region_after":"Taux_de_GC_des_régions_flanquantes_aval", "GC_gene":"Taux_de_GC_globaux_des_gènes", "intron_size":"Taille_des_introns"}
 annotation: "path/to/gff"
 OG2_genes: "path/to/OG2_genes" # cf https://www.orthodb.org/?page=filelist, "OGs to genes correspondence"
 Genes_XRefs: "path/to/gene_xrefs" # cf same site, "xrefs associated with Ortho DB gene"
