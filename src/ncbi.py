@@ -103,12 +103,22 @@ def get_genome(species_name):
     # get genome accession for species
     xml = utilities.get_xml(esearch, {"db": "assembly", "term": species_name + "[organism]", "retmax": "200", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
     results = utilities.query_xpath(xml, ".//IdList/Id")
+    url_ftp = ""
 
-    if len(results) == 0:
+    for i in results:
+        xml = utilities.get_xml(efetch, {"db": "assembly", "id": i.text, "rettype": "docsum", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"}, verbose=True)
+        for j in utilities.query_xpath(xml, ".//PropertyList/string"):
+            if j.text == "has_annotation":
+                results = utilities.query_xpath(xml, './/FtpPath_RefSeq')
+                if results[0].text == None: # no RefSeq assembly but perhaps a GenBank one
+                    print("No RefSeq assembly found ; searching genbank")
+                    results = utilities.query_xpath(xml, './/FtpPath_GenBank')
+                    if results[0].text == None:
+                        raise ValueError("No results found for " + species_name)
+                url_ftp = results[0].text
+                break
+    if url_ftp == "":
         raise ValueError("No results found for " + species_name)
-    elif not len(results) == 1:
-        print("Warning : more than one result. Will pick the first, but you may check on ncbi that it was correct. Species name was " + species_name + " and we got " + str(len(results)) + " results")
-
     # xml = utilities.get_xml(efetch, {"db": "genome", "id": results[0].text, "rettype": "docsum", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"}, verbose= True)
     # results = utilities.query_xpath(xml, './/Item[@Name="Assembly_Accession"]')
     # accession = results[0].text
@@ -122,15 +132,9 @@ def get_genome(species_name):
     # elif not len(results) == 1:
     #     print("Warning : more than one result. Will pick the first, but you may check on ncbi that it was correct. Accession was " + accession + " and we got " + str(len(results)) + " results")
 
-    xml = utilities.get_xml(efetch, {"db": "assembly", "id": results[0].text, "rettype": "docsum", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
-    results = utilities.query_xpath(xml, './/FtpPath_RefSeq')
-    if len(results) == 0: # no RefSeq assembly but perhaps a GenBank one
-        print("No RefSeq assembly found ; searching genbank")
-        results = utilities.query_xpath(xml, './/FtpPath_GenBank')
-        if len(results) == 0:
-            raise ValueError("No results found for " + str(accession))
 
-    filelist = get_files_from_ftp(results[0].text)
+
+    filelist = get_files_from_ftp(results[0].text, verbose=True)
     fasta_list = list()
     to_extract = list()
     extracted = list()
