@@ -1,5 +1,4 @@
 from Bio.SeqUtils import GC123
-import pprint
 from BCBio.GFF import GFFExaminer
 from BCBio import GFF
 from Bio import SeqIO

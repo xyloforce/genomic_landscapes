@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# expect as input :
+#1 json file from gene_names
+#2 path to OG2 genes
+#3 path to gene xrefs (see https://www.orthodb.org/?page=filelist)
+#4 is the ID given below an NCBI taxid ?
+#5 taxid or value to search in orthodb ; example: 32523, tetrapods
+
 import json
 import subprocess
 import sys
@@ -8,9 +16,8 @@ import src.orthodb as orthodb
 import src.ncbi as ncbi
 import src.utilities as utilities
 
-
-PATH_TO_OG2genes = "orthodb_data/odb10v1_OG2genes.tab" # orthodb_data/odb10v1_OG2genes.tab
-PATH_TO_GENE_XREFS = "orthodb_data/odb10v1_gene_xrefs.tab"  # orthodb_data/odb10v1_gene_xrefs.tab
+PATH_TO_OG2genes = sys.argv[2] # orthodb_data/odb10v1_OG2genes.tab
+PATH_TO_GENE_XREFS = sys.argv[3]  # orthodb_data/odb10v1_gene_xrefs.tab
 
 # ====== load gene set generated from the other script ====== #
 with open(sys.argv[1]) as json_file:
@@ -20,7 +27,7 @@ with open(sys.argv[1]) as json_file:
 if utilities.isNeeded2(genomeGenesList, 'orthologs_groups.json'):
     print("Searching orthologs")
     # Request NCBI and create a dict of human_gene:groups
-    orthologs_groups = orthodb.search(genomeGenesList)
+    orthologs_groups = orthodb.search(genomeGenesList, sys.argv[4], sys.argv[5])
     with open('orthologs_groups.json', 'w') as json_file:
         json.dump(orthologs_groups, json_file)
 else:
@@ -119,26 +126,6 @@ for gene in ncbi_gene_ids:
                     species[taxid] = list_infos
 
 for taxid in species:
-    while len(species[taxid]) < max_length: # add empty columns until its OK
+    while len(species[taxid]) < max_len: # add empty columns until its OK
         species[taxid].append("")
-    csv_taxonomy_writer.writerow(species[taxid]) # then write row
-
-## OLD : species object
-# species_dict = dict()
-
-# for gene in ncbi_gene_ids:
-#     query_dict = ncbi.summary_genes(' '.join(ncbi_gene_ids[gene]))
-#     for ortholog in query_dict["genes"]:
-#         taxid = ortholog["gene"]["tax_id"]
-#         if taxid not in species_dict:
-#             lineage = ncbi.lineage(taxid)
-#             species_dict[taxid] = classSpecies.species(taxid, ortholog["gene"]["taxname"], lineage)
-#         species_dict[taxid].add_gene(gene, ortholog["gene"]["gene_id"])
-
-# for species in species_dict:
-#     species.set_lineage(lineage(species.get_taxid()))
-
-# for species in species_dict:
-#     if not os.path.isdir("species"):
-#         os.mkdir("species")
-#     species_dict[species].export_species("species/")
+    taxo_writer.writerow(species[taxid]) # then write row
