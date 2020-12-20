@@ -44,11 +44,11 @@ File paths are to be set in the config.yaml or given to the proper script.
 
 #### Conda
 
-A global interface is available through snakemake. To use the full pipeline (creation of datasets, download of genome and plotting), run `snakemake -j 1 --use-conda`. This will create the conda envs for the pipeline and then run it with one core (no parts are multi-threaded so that's not a problem)
+A global interface is available through snakemake. To use the full pipeline (creation of datasets, download of genome and plotting), run `snakemake -j [threads to use] --use-conda`. This will create the conda envs for the pipeline and then run it with the number of cores you specified (only requests to the NCBI are multi-threaded through the threading python lib, don't hesitate to specify a high number like 10 or 20).
 
-To use only the update part, run `snakemake -j 1 --use-conda update`.
+To use only the update part, run `snakemake -j [threads to use] --use-conda update`.
 
-To use only the plotting part, just make sure that all files created by update are in the folder and run `snakemake -j 1 --use-conda` again.
+To use only the plotting part, just make sure that all files created by update are in the folder and run `snakemake -j [threads to use] --use-conda` again.
 
 #### Manual
 

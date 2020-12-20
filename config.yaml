@@ -4,3 +4,4 @@ OG2_genes: "path/to/OG2_genes" # cf https://www.orthodb.org/?page=filelist, "OGs
 Genes_XRefs: "path/to/gene_xrefs" # cf same site, "xrefs associated with Ortho DB gene"
 OrthoDBSearchID: 32523
 isPreviousNCBI: 1
+keep_sample_duplicate: 1 # when orthologs for a given gene are multiple in a species, do you want to keep one of them at random (1) or delete the gene ? (0)

@@ -25,16 +25,20 @@ rule get_orthologs:
         "species_taxid_geneID.json", "taxo_reference.csv"
     params:
         config["OG2_genes"], config["Genes_XRefs"], config["OrthoDBSearchID"], config["isPreviousNCBI"]
+    threads:
+        worflow.cores
     conda:
         "envs/python.yaml"
     shell:
-        "python3 get_orthologs.py {input} {params}"
+        "python3 get_orthologs.py {input} {params} {threads}"
 
 rule filter_species:
     input:
-        "species_taxid_geneID.json"
+        "species_taxid_geneID.json", "taxo_reference.csv"
     output:
         "results.csv"
+    params:
+        config["keep_sample_duplicate"]
     conda:
         "envs/R.yaml"
     shell:

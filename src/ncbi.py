@@ -17,14 +17,14 @@ esearch = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
 efetch = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 
 
-def summary_genes(values):
+def summary_genes(values, threads):
     count = 0
     max_query = 200
     result_dict = dict()
     temp_dict = dict()
     running_threads = dict()
     count_threads = 0
-    max_threads = 10
+    max_threads = threads
 
     start_time = time.time()
 

@@ -5,6 +5,7 @@
 #3 path to gene xrefs (see https://www.orthodb.org/?page=filelist)
 #4 is the ID given below an NCBI taxid ?
 #5 taxid or value to search in orthodb ; example: 32523, tetrapods
+#6 number of threads to use
 
 import json
 import subprocess
@@ -95,7 +96,7 @@ taxo_writer = csv.writer(h_csv_taxo)
 for gene in ncbi_gene_ids:
     if gene not in ignore:
         print("Querying gene " + str(list(ncbi_gene_ids.keys()).index(gene)) + "/" + str(len(ncbi_gene_ids.keys())))
-        query_dict = ncbi.summary_genes(ncbi_gene_ids[gene])
+        query_dict = ncbi.summary_genes(ncbi_gene_ids[gene], sys.argv[6])
         for ortholog in query_dict:
             species_name = query_dict[ortholog][0]
             taxid = query_dict[ortholog][1]
