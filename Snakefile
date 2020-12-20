@@ -38,7 +38,7 @@ rule filter_species:
     conda:
         "envs/R.yaml"
     shell:
-        "Rscript species_selection.R {input}" # needs refactoring TODO
+        "Rscript species_selection.R {input}"
 
 rule metrics:
     input:
@@ -60,4 +60,4 @@ rule heatmap:
     conda:
         "envs/R.yaml"
     shell:
-        "Rscript heatmap.R {input} {output} {params}" # same shit TODO
+        "Rscript heatmap.R {input} {output} {params}"

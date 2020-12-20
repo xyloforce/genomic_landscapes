@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-##########################################################
-# Library python for project M1 2020
-# version 0.6
-##########################################################
 import sys
 import ftplib
 import gzip
@@ -31,8 +27,6 @@ def summary_genes(values):
     max_threads = 10
 
     start_time = time.time()
-
-    # TODO : measure time to ensure that we optimize it
 
     while count < len(values):
         while threading.activeCount() < max_threads: # dont overload the server
@@ -107,29 +101,34 @@ def get_genome(species_name):
     # accession = query_dict["assemblies"][0]["assembly"]["assembly_accession"]
 
     # get genome accession for species
-    xml = utilities.get_xml(esearch, {"db": "genome", "term": species_name, "retmax": "200", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
+    xml = utilities.get_xml(esearch, {"db": "assembly", "term": species_name + "[organism]", "retmax": "200", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
     results = utilities.query_xpath(xml, ".//IdList/Id")
 
     if len(results) == 0:
         raise ValueError("No results found for " + species_name)
     elif not len(results) == 1:
-        print("Warning : more than one result. Will pick the first, but you may check on ncbi that it was correct. Species name was " + species_name + "and we got " + str(len(results)) + " results")
+        print("Warning : more than one result. Will pick the first, but you may check on ncbi that it was correct. Species name was " + species_name + " and we got " + str(len(results)) + " results")
 
-    xml = utilities.get_xml(efetch, {"db": "genome", "id": results[0].text, "rettype": "docsum", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
-    results = utilities.query_xpath(xml, './/Item[@Name="Assembly_Accession"]')
-    accession = results[0].text
+    # xml = utilities.get_xml(efetch, {"db": "genome", "id": results[0].text, "rettype": "docsum", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"}, verbose= True)
+    # results = utilities.query_xpath(xml, './/Item[@Name="Assembly_Accession"]')
+    # accession = results[0].text
 
 
     # get ftp URL for accession
-    xml = utilities.get_xml(esearch, {"db": "assembly", "term": accession, "retmax": "200", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
-    results = utilities.query_xpath(xml, ".//IdList/Id")
-    if len(results) == 0:
-        raise ValueError("No results found for " + species_name)
-    elif not len(results) == 1:
-        print("Warning : more than one result. Will pick the first, but you may check on ncbi that it was correct. Accession was " + accession + " and we got " + str(len(results)) + " results")
+    # xml = utilities.get_xml(esearch, {"db": "assembly", "term": accession, "retmax": "200", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
+    # results = utilities.query_xpath(xml, ".//IdList/Id")
+    # if len(results) == 0:
+    #     raise ValueError("No results found for " + str(accession))
+    # elif not len(results) == 1:
+    #     print("Warning : more than one result. Will pick the first, but you may check on ncbi that it was correct. Accession was " + accession + " and we got " + str(len(results)) + " results")
 
     xml = utilities.get_xml(efetch, {"db": "assembly", "id": results[0].text, "rettype": "docsum", "api_key": "5d036b2735d9eaf6fde16f4f437f1cf4fd09"})
     results = utilities.query_xpath(xml, './/FtpPath_RefSeq')
+    if len(results) == 0: # no RefSeq assembly but perhaps a GenBank one
+        print("No RefSeq assembly found ; searching genbank")
+        results = utilities.query_xpath(xml, './/FtpPath_GenBank')
+        if len(results) == 0:
+            raise ValueError("No results found for " + str(accession))
 
     filelist = get_files_from_ftp(results[0].text)
     fasta_list = list()
@@ -156,7 +155,9 @@ def get_genome(species_name):
     return extracted
 
 
-def get_files_from_ftp(url_fasta):
+def get_files_from_ftp(url_fasta, verbose = False):
+    if verbose:
+        print("FTP URL : " + url_fasta)
     url_ftp = url_fasta.split("/")[2]
     ftp = ftplib.FTP(url_ftp)
     ftp.login()

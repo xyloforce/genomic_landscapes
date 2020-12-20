@@ -77,7 +77,8 @@ else:
         last_query = row["human_gene"], row["geneID"]
         ignore.append(row["human_gene"])
         if row["taxid"] not in species:
-            lineage = ncbi.lineage(row["taxid"], True)
+            print("Getting taxonomy for species taxid " + str(row["taxid"]))
+            lineage = ncbi.lineage(row["taxid"])
             list_infos = [row["species"], row["taxid"]]
             list_infos += lineage
             if len(list_infos) > max_len:
