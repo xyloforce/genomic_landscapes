@@ -72,8 +72,12 @@ def get_intron_size(dict_gene):
         taille_exons=sum(list_taille_exons)
         taille_intron=taille_gene-taille_exons
         if taille_intron<0:
-            taille_intron='NA'
-        gene.set_taille_intron(str(taille_intron))
+            mean_intron='NA'
+        try:
+            mean_intron=taille_intron/len(gene.exons)-1
+        except:
+            mean_intron='NA'
+        gene.set_taille_intron(str(mean_intron))
 
 	
 def parsingGFF(dico_geneID, fileGFF):
